@@ -146,7 +146,7 @@ export default function CreatePostPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-black">Generate Post</h1>
+          <h2 className="text-xl font-bold text-black">Generate Post</h2>
           <p className="mt-1 text-sm text-neutral-500">
             Describe the content you want to create and let AI assist you.
           </p>
@@ -168,16 +168,11 @@ export default function CreatePostPage() {
         <div className="space-y-5">
           {/* Prompt Console */}
           <div className="rounded-lg border border-neutral-200 bg-white p-5">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4">
               <p className="flex items-center gap-2 text-xs font-semibold tracking-widest text-neutral-400">
                 <span className="h-2 w-2 rounded-full bg-blue-500" />
                 PROMPT CONSOLE
               </p>
-              <button className="text-neutral-400 hover:text-black">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-                </svg>
-              </button>
             </div>
             
             <textarea

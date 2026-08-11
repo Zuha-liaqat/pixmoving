@@ -2,8 +2,8 @@ import { NavLink, useNavigate } from 'react-router-dom'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'grid' },
-  { to: '/create-post', label: 'Create Post', icon: 'plus' },
   { to: '/themes', label: 'Themes', icon: 'palette' },
+  { to: '/create-post', label: 'Create Post', icon: 'plus' },
   { to: '/library', label: 'Library', icon: 'folder' },
   { to: '/approval-queue', label: 'Approval Queue', icon: 'check' },
   { to: '/calendar', label: 'Calendar', icon: 'calendar' },
@@ -87,7 +87,7 @@ function Icon({ name, className }) {
   )
 }
 
-export default function Sidebar({ open = false, onClose = () => {} }) {
+export default function Sidebar({ open = false, onClose = () => { } }) {
   const navigate = useNavigate()
 
   function handleLogout() {
@@ -104,9 +104,8 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-60 shrink-0 -translate-x-full flex-col border-r border-neutral-200 bg-white transition-transform duration-200 lg:static lg:translate-x-0 ${
-          open ? 'translate-x-0' : ''
-        }`}
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-60 shrink-0 -translate-x-full flex-col border-r border-neutral-200 bg-white transition-transform duration-200 lg:static lg:translate-x-0 ${open ? 'translate-x-0' : ''
+          }`}
       >
         <div className="relative px-5">
           <img
@@ -130,9 +129,8 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
             <NavLink key={item.to} to={item.to} onClick={onClose}>
               {({ isActive }) => (
                 <span
-                  className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-sm font-medium transition ${
-                    isActive ? 'bg-black text-white' : 'text-neutral-600 hover:bg-neutral-50'
-                  }`}
+                  className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-sm font-medium transition ${isActive ? 'bg-black text-white' : 'text-neutral-600 hover:bg-neutral-50'
+                    }`}
                 >
                   {isActive && <span className="absolute left-0 top-0 h-full w-1 bg-blue-500" />}
                   <Icon name={item.icon} className="h-4 w-4" />
@@ -147,9 +145,8 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
           <NavLink to="/settings" onClick={onClose}>
             {({ isActive }) => (
               <span
-                className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-sm font-medium transition ${
-                  isActive ? 'bg-black text-white' : 'text-neutral-600 hover:bg-neutral-50'
-                }`}
+                className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-sm font-medium transition ${isActive ? 'bg-black text-white' : 'text-neutral-600 hover:bg-neutral-50'
+                  }`}
               >
                 {isActive && <span className="absolute left-0 top-0 h-full w-1 bg-blue-500" />}
                 <Icon name="settings" className="h-4 w-4" />
