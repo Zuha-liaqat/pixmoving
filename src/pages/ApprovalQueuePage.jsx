@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { queueItems as initialQueueItems } from '../data/queueItems'
 import PostPreviewModal from '../components/PostPreviewModal'
 
@@ -350,9 +350,16 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
 
 export default function ApprovalQueuePage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const view = searchParams.get('view') === 'grid' ? 'grid' : 'list'
-  const [items, setItems] = useState(initialQueueItems)
+  const newPost = location.state?.newPost
+  const [items, setItems] = useState(() => {
+    if (newPost) {
+      return [newPost, ...initialQueueItems]
+    }
+    return initialQueueItems
+  })
   const [selectedIds, setSelectedIds] = useState(new Set())
   const [previewItem, setPreviewItem] = useState(null)
 

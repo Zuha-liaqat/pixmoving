@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
+import CreatePostPage from './pages/CreatePostPage'
 import LibraryPage from './pages/LibraryPage'
 import ApprovalQueuePage from './pages/ApprovalQueuePage'
 import EditContentPage from './pages/EditContentPage'
@@ -18,6 +19,7 @@ function App() {
             path="/dashboard"
             element={<PlaceholderPage title="Dashboard" />}
           />
+          <Route path="/create-post" element={<CreatePostPage />} />
           <Route path="/themes" element={<PlaceholderPage title="Themes" />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/approval-queue" element={<ApprovalQueuePage />} />
