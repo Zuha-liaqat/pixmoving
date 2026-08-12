@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { queueItems, curationInsights } from '../data/queueItems'
+import { curationInsights } from '../data/queueItems'
+import { getQueueItemById, updateGeneratedPost } from '../data/posts'
 
 const channelMeta = {
   Instagram: (
@@ -27,7 +28,7 @@ export default function EditContentPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const backTo = searchParams.get('view') === 'grid' ? '/approval-queue?view=grid' : '/approval-queue'
-  const item = queueItems.find((q) => q.id === id)
+  const item = getQueueItemById(id)
 
   const [caption, setCaption] = useState(item?.caption ?? '')
   const [hashtags, setHashtags] = useState(item?.hashtags ?? [])
@@ -63,6 +64,11 @@ export default function EditContentPage() {
 
   const scoreDeg = curationInsights.score * 3.6
 
+  function handleSave() {
+    updateGeneratedPost(id, { caption, hashtags, channels })
+    navigate(backTo)
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -76,7 +82,7 @@ export default function EditContentPage() {
           Back to Approval Queue
         </button>
         <button
-          onClick={() => navigate(backTo)}
+          onClick={handleSave}
           className="rounded-md bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-neutral-800"
         >
           Save Changes

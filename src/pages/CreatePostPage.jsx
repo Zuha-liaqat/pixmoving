@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { saveGeneratedPost } from '../data/posts'
 
 const toneOptions = ['Professional', 'Casual', 'Enthusiastic', 'Informative', 'Humorous']
 const languageOptions = ['EN-US', 'EN-GB', 'ES', 'FR', 'DE', 'JA']
@@ -136,7 +137,9 @@ export default function CreatePostPage() {
         hashtags: tags,
         channels: selectedPlatforms,
       }
-      
+
+      saveGeneratedPost(newPost)
+
       navigate('/approval-queue', { state: { newPost } })
     }, 3000)
   }

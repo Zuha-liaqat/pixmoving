@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
-import { queueItems as initialQueueItems } from '../data/queueItems'
+import { getAllQueueItems, removeGeneratedPost, updateGeneratedPost } from '../data/posts'
 import PostPreviewModal from '../components/PostPreviewModal'
 
 const platformIcons = {
@@ -355,10 +355,11 @@ export default function ApprovalQueuePage() {
   const view = searchParams.get('view') === 'grid' ? 'grid' : 'list'
   const newPost = location.state?.newPost
   const [items, setItems] = useState(() => {
-    if (newPost) {
-      return [newPost, ...initialQueueItems]
+    const base = getAllQueueItems()
+    if (newPost && !base.some((p) => p.id === newPost.id)) {
+      return [newPost, ...base]
     }
-    return initialQueueItems
+    return base
   })
   const [selectedIds, setSelectedIds] = useState(new Set())
   const [previewItem, setPreviewItem] = useState(null)
@@ -373,6 +374,7 @@ export default function ApprovalQueuePage() {
 
   function handleDelete(id) {
     if (!window.confirm('Delete this post? This cannot be undone.')) return
+    removeGeneratedPost(id)
     setItems((prev) => prev.filter((item) => item.id !== id))
     setSelectedIds((prev) => {
       const next = new Set(prev)
@@ -397,6 +399,7 @@ export default function ApprovalQueuePage() {
   }
 
   function handleBatchApprove() {
+    selectedIds.forEach((id) => updateGeneratedPost(id, { status: 'PRODUCTION' }))
     setItems((prev) =>
       prev.map((item) =>
         selectedIds.has(item.id) ? { ...item, status: 'PRODUCTION' } : item,
@@ -406,6 +409,7 @@ export default function ApprovalQueuePage() {
   }
 
   function handleApprove(id) {
+    updateGeneratedPost(id, { status: 'PRODUCTION' })
     setItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, status: 'PRODUCTION' } : item)),
     )
