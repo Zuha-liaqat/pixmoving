@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
+import DashboardPage from './pages/DashboardPage'
 import CreatePostPage from './pages/CreatePostPage'
 import LibraryPage from './pages/LibraryPage'
 import ApprovalQueuePage from './pages/ApprovalQueuePage'
@@ -17,7 +18,7 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route
             path="/dashboard"
-            element={<PlaceholderPage title="Dashboard" />}
+            element={<DashboardPage />}
           />
           <Route path="/create-post" element={<CreatePostPage />} />
           <Route path="/themes" element={<PlaceholderPage title="Themes" />} />
