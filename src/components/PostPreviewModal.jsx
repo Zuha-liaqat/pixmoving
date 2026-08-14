@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Wifi as WifiIcon } from 'lucide-react'
 
 function getInitials(title) {
   const letters = title
@@ -104,14 +105,11 @@ const ChartIcon = (props) => (
 )
 
 const SignalIcon = (props) => (
-  <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
-    <path d="M2 20h2v-6H2v6zm4 0h2v-10H6v10zm4 0h2V8h-2v12zm4 0h2V5h-2v15zm4 0h2V2h-2v18z" />
-  </svg>
-)
-
-const WifiIcon = (props) => (
-  <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
-    <path d="M12 21a2 2 0 110-4 2 2 0 010 4zm0-6c1.9 0 3.7.6 5.1 1.7l1.5-1.5A10.9 10.9 0 0012 12c-3 0-5.8 1.2-7.8 3.2l1.5 1.5C8.2 15.6 10 15 12 15zm0-5c3.2 0 6.1 1.3 8.3 3.4l1.5-1.5A15.9 15.9 0 0012 7c-4.4 0-8.4 1.8-11.3 4.7l1.5 1.5A13.9 13.9 0 0112 10zm0-5c4.6 0 8.8 1.9 11.8 4.9l1.5-1.5A18 18 0 0012 2 18 18 0 00.7 6.6l1.5 1.5A16 16 0 0112 5z" />
+  <svg fill="currentColor" viewBox="0 0 18 12" {...props}>
+    <rect x="0" y="7" width="2.5" height="5" rx="0.75" />
+    <rect x="5" y="4.5" width="2.5" height="7.5" rx="0.75" />
+    <rect x="10" y="2" width="2.5" height="10" rx="0.75" />
+    <rect x="15" y="0" width="2.5" height="12" rx="0.75" />
   </svg>
 )
 
