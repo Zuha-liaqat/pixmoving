@@ -2,6 +2,19 @@
 
 @theme {
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --color-canvas: #f6f7f9;
+
+  --color-brand-50: #ecfafd;
+  --color-brand-100: #d4f3fa;
+  --color-brand-200: #ade7f3;
+  --color-brand-300: #78d8ea;
+  --color-brand-400: #4ccae1;
+  --color-brand-500: #3bc1de;
+  --color-brand-600: #259fc2;
+  --color-brand-700: #2181a0;
+  --color-brand-800: #216a83;
+  --color-brand-900: #1f576c;
 }
 
 body {

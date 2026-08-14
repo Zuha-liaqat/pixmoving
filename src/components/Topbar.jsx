@@ -1,4 +1,18 @@
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { getUnreadCount } from '../data/notifications'
+
 export default function Topbar({ onMenuClick = () => {} }) {
+  const [unread, setUnread] = useState(() => getUnreadCount())
+
+  useEffect(() => {
+    function check() {
+      setUnread(getUnreadCount())
+    }
+    check()
+    const id = setInterval(check, 2000)
+    return () => clearInterval(id)
+  }, [])
   return (
     <header className="flex items-center justify-between gap-2 border-b border-neutral-200 bg-white px-3 py-3 sm:px-6">
       <button
@@ -10,7 +24,7 @@ export default function Topbar({ onMenuClick = () => {} }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
         </svg>
       </button>
-      <div className="flex w-full min-w-0 max-w-md items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 transition focus-within:border-black focus-within:bg-white focus-within:ring-2 focus-within:ring-black/10">
+      <div className="flex w-full min-w-0 max-w-md items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 transition focus-within:border-brand-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-500/20">
         <svg
           className="h-4 w-4 shrink-0 text-neutral-400"
           fill="none"
@@ -32,11 +46,12 @@ export default function Topbar({ onMenuClick = () => {} }) {
       </div>
 
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-        <button
-          className="relative rounded-full p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-black"
+        <Link
+          to="/notifications"
+          className="relative rounded-full p-1.5 text-neutral-500 transition hover:bg-neutral-100 hover:text-black"
           aria-label="Notifications"
         >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -44,8 +59,12 @@ export default function Topbar({ onMenuClick = () => {} }) {
               d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7a6 6 0 00-6-6h-.75a6 6 0 00-6 6v.75a8.967 8.967 0 01-2.311 6.022 23.848 23.848 0 005.454 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
             />
           </svg>
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />
-        </button>
+          {unread > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+              {unread}
+            </span>
+          )}
+        </Link>
         <button
           className="rounded-full p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-black"
           aria-label="Help"
@@ -60,11 +79,11 @@ export default function Topbar({ onMenuClick = () => {} }) {
           </svg>
         </button>
         <div className="ml-2 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-800 text-xs font-semibold text-white ring-2 ring-white shadow-sm">
-            O1
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-xs font-semibold text-white ring-2 ring-white shadow-sm">
+            AM
           </div>
           <div className="hidden text-left leading-tight sm:block">
-            <p className="text-sm font-medium text-black">Operator 01</p>
+            <p className="text-sm font-medium text-black">Alex Martinez</p>
             <p className="text-xs text-neutral-400">Admin</p>
           </div>
         </div>

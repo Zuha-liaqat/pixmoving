@@ -129,10 +129,11 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
             <NavLink key={item.to} to={item.to} onClick={onClose}>
               {({ isActive }) => (
                 <span
-                  className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-sm font-medium transition ${isActive ? 'bg-black text-white' : 'text-neutral-600 hover:bg-neutral-50'
-                    }`}
+                  className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                    isActive ? 'bg-brand-500 text-white' : 'text-neutral-600 hover:bg-neutral-50'
+                  }`}
                 >
-                  {isActive && <span className="absolute left-0 top-0 h-full w-1 bg-blue-500" />}
+                  {isActive && <span className="absolute left-0 top-0 h-full w-1 bg-brand-500" />}
                   <Icon name={item.icon} className="h-4 w-4" />
                   {item.label}
                 </span>
@@ -144,11 +145,12 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
         <div className="border-t border-neutral-200 px-3 py-4">
           <NavLink to="/settings" onClick={onClose}>
             {({ isActive }) => (
-              <span
-                className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-sm font-medium transition ${isActive ? 'bg-black text-white' : 'text-neutral-600 hover:bg-neutral-50'
+                <span
+                  className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                    isActive ? 'bg-brand-500 text-white' : 'text-neutral-600 hover:bg-neutral-50'
                   }`}
-              >
-                {isActive && <span className="absolute left-0 top-0 h-full w-1 bg-blue-500" />}
+                >
+                {isActive && <span className="absolute left-0 top-0 h-full w-1 bg-brand-500" />}
                 <Icon name="settings" className="h-4 w-4" />
                 Settings
               </span>
@@ -156,7 +158,7 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
           </NavLink>
           <button
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-neutral-600 transition hover:bg-red-50 hover:text-red-600"
+            className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
           >
             <Icon name="logout" className="h-4 w-4" />
             Logout

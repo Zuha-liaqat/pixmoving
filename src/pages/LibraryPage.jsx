@@ -148,7 +148,7 @@ export default function LibraryPage() {
                   onClick={() => setActiveType(mt.key)}
                   className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
                     activeType === mt.key
-                      ? 'bg-black text-white shadow-sm'
+                      ? 'bg-brand-500 text-white shadow-sm'
                       : 'text-neutral-500 hover:bg-white hover:text-neutral-800'
                   }`}
                 >
@@ -231,7 +231,7 @@ export default function LibraryPage() {
                 <span className="ml-1 text-xs text-neutral-400">used</span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200">
-                <div className="h-full w-full rounded-full bg-black" />
+                <div className="h-full w-full rounded-full bg-brand-500" />
               </div>
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function LibraryPage() {
          
           <button
             onClick={() => setShowUpload(true)}
-            className="flex items-center gap-1.5 rounded-md bg-black px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+            className="flex items-center gap-1.5 rounded-md bg-brand-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-600"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path

@@ -83,7 +83,7 @@ export default function EditContentPage() {
         </button>
         <button
           onClick={handleSave}
-          className="rounded-md bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-neutral-800"
+          className="rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
         >
           Save Changes
         </button>
@@ -131,7 +131,7 @@ export default function EditContentPage() {
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               rows={5}
-              className="w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-700 outline-none focus:border-black focus:bg-white focus:ring-2 focus:ring-black/10"
+              className="w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-700 outline-none focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/15"
             />
           </div>
 
@@ -200,7 +200,7 @@ export default function EditContentPage() {
                     onClick={() => toggleChannel(name)}
                     className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
                       active
-                        ? 'border-black bg-black text-white'
+                        ? 'border-brand-500 bg-brand-500 text-white'
                         : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'
                     }`}
                   >
@@ -222,7 +222,7 @@ export default function EditContentPage() {
             <div
               className="mx-auto flex h-28 w-28 items-center justify-center rounded-full"
               style={{
-                background: `conic-gradient(#000 ${scoreDeg}deg, #e5e5e5 ${scoreDeg}deg)`,
+                background: `conic-gradient(#3bc1de ${scoreDeg}deg, #e5e5e5 ${scoreDeg}deg)`,
               }}
             >
               <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white text-2xl font-bold text-black">
@@ -300,7 +300,7 @@ export default function EditContentPage() {
             </div>
           </div>
 
-          <div className="rounded-lg bg-black p-5 text-white">
+          <div className="rounded-lg bg-gradient-to-r from-brand-500 to-brand-600 p-5 text-white">
             <p className="text-sm font-semibold">Boost Strategy</p>
             <p className="mt-1 text-xs text-neutral-300">
               This content is eligible for a $50 promotion trial.

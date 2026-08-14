@@ -104,7 +104,7 @@ export default function UploadAssetModal({ item, onClose, onSaved }) {
               accept="image/*"
               required={!isEditing}
               onChange={(e) => setImage(e.target.files?.[0] ?? null)}
-              className="w-full text-sm text-neutral-600 file:mr-3 file:rounded-md file:border-0 file:bg-black file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-neutral-800"
+              className="w-full text-sm text-neutral-600 file:mr-3 file:rounded-md file:border-0 file:bg-brand-500 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-brand-600"
             />
           </div>
 
@@ -113,7 +113,7 @@ export default function UploadAssetModal({ item, onClose, onSaved }) {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-black py-2.5 text-sm font-semibold tracking-wide text-white transition hover:bg-neutral-800 disabled:opacity-60"
+            className="w-full rounded-lg bg-brand-500 py-2.5 text-sm font-semibold tracking-wide text-white transition hover:bg-brand-600 disabled:opacity-60"
           >
             {submitting
               ? isEditing

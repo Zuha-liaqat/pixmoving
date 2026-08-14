@@ -6,6 +6,7 @@ import LibraryPage from './pages/LibraryPage'
 import ApprovalQueuePage from './pages/ApprovalQueuePage'
 import EditContentPage from './pages/EditContentPage'
 import CalendarPage from './pages/CalendarPage'
+import NotificationsPage from './pages/NotificationsPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 import DashboardLayout from './layouts/DashboardLayout'
 
@@ -26,6 +27,7 @@ function App() {
           <Route path="/approval-queue" element={<ApprovalQueuePage />} />
           <Route path="/approval-queue/:id/edit" element={<EditContentPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route
             path="/settings"
             element={<PlaceholderPage title="Settings" />}

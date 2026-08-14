@@ -5,9 +5,9 @@ const statCards = [
   {
     value: '12',
     label: 'Drafted this week',
-    accent: 'text-cyan-500',
+    accent: 'text-brand-500',
     detail: '↑ across 3 platforms',
-    detailColor: 'text-cyan-500',
+    detailColor: 'text-brand-500',
   },
   {
     value: '4',
@@ -26,9 +26,14 @@ const statCards = [
   {
     value: '18',
     label: 'Published this month',
-    accent: 'text-cyan-500',
-    detail: 'Across LinkedIn, Instagram, X',
-    detailColor: 'text-cyan-500',
+    accent: 'text-brand-500',
+    detail: (
+      <>
+        Across <span className="font-semibold text-[#0A66C2]">LinkedIn</span>,{' '}
+        <span className="font-semibold text-[#E4405F]">Instagram</span> and{' '}
+        <span className="font-semibold text-black">X/Twitter</span>
+      </>
+    ),
   },
 ]
 
@@ -48,28 +53,28 @@ const platforms = [
   {
     name: 'Instagram',
     icon: (
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
-        <rect x="2" y="2" width="20" height="20" rx="5" fill="url(#dash-ig)" />
-        <circle cx="12" cy="12" r="4" stroke="white" strokeWidth="2" fill="none" />
-        <circle cx="17.5" cy="6.5" r="1.5" fill="white" />
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="dash-ig" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#feda75" />
-            <stop offset="20%" stopColor="#fa7e1e" />
-            <stop offset="40%" stopColor="#d62976" />
-            <stop offset="60%" stopColor="#962fbf" />
-            <stop offset="100%" stopColor="#4f5bd5" />
+          <linearGradient id="dash-ig" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FEDA75" />
+            <stop offset="25%" stopColor="#FA7E1E" />
+            <stop offset="50%" stopColor="#D62976" />
+            <stop offset="75%" stopColor="#962FBF" />
+            <stop offset="100%" stopColor="#4F5BD5" />
           </linearGradient>
         </defs>
+        <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="url(#dash-ig)" strokeWidth="2" />
+        <circle cx="12" cy="12" r="4.2" stroke="url(#dash-ig)" strokeWidth="2" />
+        <circle cx="17.3" cy="6.7" r="1.2" fill="url(#dash-ig)" />
       </svg>
     ),
     drafted: 4,
     scheduled: 1,
     published: 6,
-    barColor: 'bg-pink-500',
+    barColor: 'bg-[#E4405F]',
   },
   {
-    name: 'X',
+    name: 'X/Twitter',
     icon: (
       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="black">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -161,7 +166,7 @@ export default function DashboardPage() {
     .slice(0, 3)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Stat Cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {statCards.map((card) => (
@@ -171,7 +176,7 @@ export default function DashboardPage() {
           >
             <p className={`text-3xl font-bold ${card.accent}`}>{card.value}</p>
             <p className="mt-1 text-sm text-neutral-500">{card.label}</p>
-            <p className={`mt-2 text-xs font-medium ${card.detailColor}`}>
+            <p className={`mt-2 text-xs font-medium ${card.detailColor ?? ''}`}>
               {card.detail}
             </p>
           </div>
@@ -179,14 +184,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Middle Row */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr]">
         {/* Platforms at a glance */}
         <div>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-xl font-bold text-black">Platforms at a glance</h2>
             <button
               onClick={() => navigate('/calendar')}
-              className="text-sm font-medium text-cyan-500 hover:text-cyan-600"
+              className="text-sm font-medium text-brand-600 hover:text-brand-700"
             >
               Open calendar →
             </button>
@@ -276,7 +281,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr]">
         {/* Recent activity */}
         <div>
           <h2 className="mb-3 text-xl font-bold text-black">Recent activity</h2>
@@ -309,7 +314,7 @@ export default function DashboardPage() {
             {upcomingEvents.length === 0 ? (
               <p className="text-sm text-neutral-400">No upcoming events</p>
             ) : (
-              <div className="space-y-4">
+    <div className="space-y-3">
                 {upcomingEvents.map((event, i) => {
                   const date = getUpcomingDate(event.dayOffset)
                   const plats = eventPlatforms[event.title] || []

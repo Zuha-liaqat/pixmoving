@@ -81,7 +81,7 @@ export default function LoginPage() {
                   name="email"
                   type="text"
                   autoComplete="username"
-                  placeholder="operator@pixmoving.com"
+                  placeholder="alex@pixmoving.com"
                   value={form.email}
                   onChange={handleChange}
                   className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-400"
@@ -173,7 +173,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-black py-2.5 text-sm font-semibold tracking-wide text-white shadow-sm transition hover:bg-neutral-800 hover:shadow-md disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-500 py-2.5 text-sm font-semibold tracking-wide text-white shadow-sm transition hover:bg-brand-600 hover:shadow-md disabled:opacity-60"
             >
               {submitting && (
                 <svg className="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">

@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { getAllQueueItems, removeGeneratedPost, updateGeneratedPost } from '../data/posts'
+import { addNotification } from '../data/notifications'
 import PostPreviewModal from '../components/PostPreviewModal'
 
 const platformIcons = {
   Twitter: (
-    <div className="flex h-6 w-6 items-center justify-center rounded bg-black text-[11px] font-bold text-white">
-      X
-    </div>
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="black" aria-label="X">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
   ),
   'Web App': (
     <div className="flex h-6 w-6 items-center justify-center rounded bg-sky-500 text-white">
@@ -34,18 +35,25 @@ const platformIcons = {
     </div>
   ),
   Instagram: (
-    <div className="flex h-6 w-6 items-center justify-center rounded bg-gradient-to-br from-fuchsia-500 to-amber-400 text-white">
-      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <rect x="4" y="4" width="16" height="16" rx="4" strokeWidth={2} />
-        <circle cx="12" cy="12" r="3.2" strokeWidth={2} />
-        <circle cx="16.2" cy="7.8" r="0.6" fill="currentColor" stroke="none" />
-      </svg>
-    </div>
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Instagram">
+      <defs>
+        <linearGradient id="aq-ig" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#FEDA75" />
+          <stop offset="25%" stopColor="#FA7E1E" />
+          <stop offset="50%" stopColor="#D62976" />
+          <stop offset="75%" stopColor="#962FBF" />
+          <stop offset="100%" stopColor="#4F5BD5" />
+        </linearGradient>
+      </defs>
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="url(#aq-ig)" strokeWidth="2" />
+      <circle cx="12" cy="12" r="4.2" stroke="url(#aq-ig)" strokeWidth="2" />
+      <circle cx="17.3" cy="6.7" r="1.2" fill="url(#aq-ig)" />
+    </svg>
   ),
   LinkedIn: (
-    <div className="flex h-6 w-6 items-center justify-center rounded bg-[#0A66C2] text-[10px] font-bold text-white">
-      in
-    </div>
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="#0A66C2" aria-label="LinkedIn">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
   ),
 }
 
@@ -153,7 +161,7 @@ function ListView({ items, onPreview, onEdit, onDelete, selectedIds, onToggle, o
                   type="checkbox"
                   checked={allSelected}
                   onChange={() => onToggleAll(items.map((item) => item.id))}
-                  className="h-4 w-4 rounded border-neutral-300 accent-black"
+                  className="h-4 w-4 rounded border-neutral-300 accent-brand-500"
                 />
               </th>
               <th className="px-3 py-3.5">POST PREVIEW</th>
@@ -171,7 +179,7 @@ function ListView({ items, onPreview, onEdit, onDelete, selectedIds, onToggle, o
                 <tr
                   key={item.id}
                   className={`border-b border-neutral-100 last:border-0 transition ${
-                    checked ? 'bg-blue-50/50' : 'hover:bg-neutral-50'
+                    checked ? 'bg-brand-50' : 'hover:bg-neutral-50'
                   }`}
                 >
                   <td className="px-4 py-3.5">
@@ -179,15 +187,25 @@ function ListView({ items, onPreview, onEdit, onDelete, selectedIds, onToggle, o
                       type="checkbox"
                       checked={checked}
                       onChange={() => onToggle(item.id)}
-                      className="h-4 w-4 rounded border-neutral-300 accent-black"
+                      className="h-4 w-4 rounded border-neutral-300 accent-brand-500"
                     />
                   </td>
                   <td className="px-3 py-3.5">
                     <div className="flex items-center gap-3">
                       <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-xs font-bold text-white/90 shadow-sm ${item.thumbClass}`}
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white text-[10px] font-bold text-white/90 shadow-sm ${
+                          item.images && item.images.length > 0 ? '' : item.thumbClass
+                        }`}
                       >
-                        {getInitials(item.title)}
+                        {item.images && item.images.length > 0 ? (
+                          <img
+                            src={item.images[0].dataUri}
+                            alt={item.images[0].name}
+                            className="h-full w-full object-contain"
+                          />
+                        ) : (
+                          item.thumbLabel?.slice(0, 4) || getInitials(item.title)
+                        )}
                       </div>
                       <div>
                         <p className="font-medium text-black">{item.title}</p>
@@ -236,7 +254,7 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {items.map((item) => {
           const approved = item.status === 'PRODUCTION'
           return (
@@ -253,9 +271,22 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
               </div>
 
               <div
-                className={`flex h-40 items-center justify-center text-3xl font-bold text-white/80 ${item.thumbClass}`}
+                className={`flex h-40 flex-col items-center justify-center gap-1 overflow-hidden bg-white text-white ${
+                  item.images && item.images.length > 0 ? '' : item.thumbClass
+                }`}
               >
-                {getInitials(item.title)}
+                {item.images && item.images.length > 0 ? (
+                  <img
+                    src={item.images[0].dataUri}
+                    alt={item.images[0].name}
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <>
+                    <span className="text-2xl font-bold tracking-wider opacity-90">{item.thumbLabel || getInitials(item.title)}</span>
+                    <span className="text-[10px] font-medium tracking-widest text-white/60">{item.id}</span>
+                  </>
+                )}
               </div>
 
               <div className="flex flex-1 flex-col gap-2 p-3">
@@ -264,12 +295,12 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
                 <p className="text-sm text-sky-600">{item.hashtags.join(' ')}</p>
               </div>
 
-              <div className="grid grid-cols-3 border-t border-neutral-200">
+              <div className="flex flex-wrap border-t border-neutral-200">
                 <button
                   onClick={() => onPreview(item)}
-                  className="flex items-center justify-center gap-1.5 border-r border-neutral-200 py-2.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-50"
+                  className="flex min-w-[96px] flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap text-neutral-600 transition hover:bg-neutral-50"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -282,9 +313,9 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
                 </button>
                 <button
                   onClick={() => onEdit(item.id)}
-                  className="flex items-center justify-center gap-1.5 border-r border-neutral-200 py-2.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-50"
+                  className="flex min-w-[96px] flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap text-neutral-600 transition hover:bg-neutral-50"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -296,11 +327,11 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
                 </button>
                 <button
                   onClick={() => onApprove(item.id)}
-                  className={`flex items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition ${
-                    approved ? 'bg-emerald-600 text-white' : 'bg-black text-white hover:bg-neutral-800'
+                  className={`flex min-w-[104px] flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap transition ${
+                    approved ? 'bg-emerald-600 text-white' : 'bg-brand-500 text-white hover:bg-brand-600'
                   }`}
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -322,7 +353,7 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
           <div className="mt-1.5 flex items-center gap-2">
             <div className="h-1.5 w-32 overflow-hidden rounded-full bg-neutral-200">
               <div
-                className="h-full rounded-full bg-black transition-all"
+                className="h-full rounded-full bg-brand-500 transition-all"
                 style={{ width: `${items.length ? (approvedCount / items.length) * 100 : 0}%` }}
               />
             </div>
@@ -336,10 +367,10 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
             <p className="text-[10px] font-semibold tracking-widest text-neutral-400">SCHEDULED FOR</p>
             <p className="text-sm font-medium text-black">Oct 24, 09:00 AM (UTC)</p>
           </div>
-          <button className="rounded-md px-3 py-2 text-sm font-medium text-neutral-600 ring-1 ring-neutral-200 hover:bg-neutral-50">
+          <button className="rounded-md px-3 py-2 text-sm font-medium text-brand-600 ring-1 ring-brand-200 hover:bg-brand-50">
             Re-Generate All
           </button>
-          <button className="rounded-md bg-black px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800">
+          <button className="rounded-md bg-brand-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-600">
             Finalize &amp; Queue
           </button>
         </div>
@@ -386,7 +417,11 @@ export default function ApprovalQueuePage() {
   function handleToggle(id) {
     setSelectedIds((prev) => {
       const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
       return next
     })
   }
@@ -399,20 +434,41 @@ export default function ApprovalQueuePage() {
   }
 
   function handleBatchApprove() {
+    const count = selectedIds.size
     selectedIds.forEach((id) => updateGeneratedPost(id, { status: 'PRODUCTION' }))
-    setItems((prev) =>
-      prev.map((item) =>
+    setItems((prev) => {
+      const approved = prev.filter((i) => selectedIds.has(i.id))
+      if (approved.length > 0) {
+        addNotification({
+          type: 'approval',
+          title: `${count} post${count > 1 ? 's' : ''} approved`,
+          description: `${count} post${count > 1 ? 's have' : ' has'} been approved and queued for publishing.`,
+          platform: 'Multi-platform',
+          author: 'Alex Martinez',
+        })
+      }
+      return prev.map((item) =>
         selectedIds.has(item.id) ? { ...item, status: 'PRODUCTION' } : item,
-      ),
-    )
+      )
+    })
     setSelectedIds(new Set())
   }
 
   function handleApprove(id) {
     updateGeneratedPost(id, { status: 'PRODUCTION' })
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: 'PRODUCTION' } : item)),
-    )
+    setItems((prev) => {
+      const item = prev.find((i) => i.id === id)
+      if (item) {
+        addNotification({
+          type: 'approval',
+          title: `"${item.title}" approved`,
+          description: `Your ${item.platform} post has been approved and moved to production.`,
+          platform: item.platform,
+          author: 'Alex Martinez',
+        })
+      }
+      return prev.map((i) => (i.id === id ? { ...i, status: 'PRODUCTION' } : i))
+    })
   }
 
   return (
@@ -438,7 +494,7 @@ export default function ApprovalQueuePage() {
               onClick={() => setView('list')}
               aria-label="List view"
               className={`flex h-7 w-7 items-center justify-center rounded transition ${
-                view === 'list' ? 'bg-black text-white' : 'text-neutral-400 hover:text-black'
+                view === 'list' ? 'bg-brand-500 text-white' : 'text-neutral-400 hover:text-black'
               }`}
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -449,7 +505,7 @@ export default function ApprovalQueuePage() {
               onClick={() => setView('grid')}
               aria-label="Grid view"
               className={`flex h-7 w-7 items-center justify-center rounded transition ${
-                view === 'grid' ? 'bg-black text-white' : 'text-neutral-400 hover:text-black'
+                view === 'grid' ? 'bg-brand-500 text-white' : 'text-neutral-400 hover:text-black'
               }`}
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -466,7 +522,7 @@ export default function ApprovalQueuePage() {
           <button
             onClick={handleBatchApprove}
             disabled={selectedIds.size === 0}
-            className="flex items-center gap-1.5 rounded-md bg-black px-3 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-1.5 rounded-md bg-brand-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
