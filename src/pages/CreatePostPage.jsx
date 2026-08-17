@@ -295,7 +295,7 @@ export default function CreatePostPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -316,22 +316,22 @@ export default function CreatePostPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {/* Left Column */}
-        <div className="space-y-4">
+        <div className="flex flex-col gap-3">
           {/* Prompt Console */}
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-5">
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.prompt} chip={sectionChips.prompt} title="PROMPT CONSOLE" />
 
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Describe the post in detail. e.g., 'Write a professional LinkedIn post announcing our new autonomous coffee cart fleet in Tokyo. Emphasize the sustainable design and modern aesthetics. Target audience is urban planners and tech enthusiasts. Tone should be innovative yet grounded.'"
-              rows={22}
+              rows={11}
               className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
 
-            <div ref={dropdownRef} className="mt-4 flex flex-wrap items-center gap-3">
+            <div ref={dropdownRef} className="mt-3 flex flex-wrap items-center gap-3">
               {/* Tone Selector */}
               <div className="relative">
                 <button
@@ -411,9 +411,9 @@ export default function CreatePostPage() {
           </div>
 
           {/* Schedule */}
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-5">
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.schedule} chip={sectionChips.schedule} title="SCHEDULE" />
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <label htmlFor="schedule-date" className="mb-1.5 block text-xs font-medium text-neutral-500">
                   Date
@@ -454,7 +454,7 @@ export default function CreatePostPage() {
           </div>
 
           {/* Reference URL */}
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-5">
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.link} chip={sectionChips.link} title="REFERENCE URL" />
             <div className="relative">
               <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
@@ -477,9 +477,9 @@ export default function CreatePostPage() {
         </div>
 
         {/* Right Column */}
-        <div className="space-y-4">
+        <div className="flex flex-col gap-3">
           {/* Media Assets */}
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-5">
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.media} chip={sectionChips.media} title="MEDIA ASSETS" />
 
             <input
@@ -496,7 +496,7 @@ export default function CreatePostPage() {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center transition ${
+              className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition ${
                 isDragOver
                   ? 'border-brand-500 bg-brand-100'
                   : 'border-brand-300 bg-white hover:border-brand-400 hover:bg-brand-100/60'
@@ -539,13 +539,13 @@ export default function CreatePostPage() {
           </div>
 
           {/* Additional Details */}
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-5">
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.details} chip={sectionChips.details} title="ADDITIONAL DETAILS" />
             <textarea
               value={additionalDetails}
               onChange={(e) => setAdditionalDetails(e.target.value)}
               placeholder="Specific instructions, platform notes (e.g., 'Keep it under 280 characters for Twitter', 'Include #FutureMobility hashtag')..."
-              rows={4}
+              rows={3}
               className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
 
@@ -586,7 +586,7 @@ export default function CreatePostPage() {
           </div>
 
           {/* Platform Target */}
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-5">
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.target} chip={sectionChips.target} title="PLATFORM TARGET" />
             <div className="space-y-3">
               {Object.entries(platformIcons).map(([platform, icon]) => (

@@ -445,8 +445,8 @@ function MonthView({ grid, monthDate, today, eventsByDate, selected, onSelect, o
                       selected?.id === ev.id ? 'ring-2 ring-brand-500' : ''
                     } ${ev.bannerColor ?? typeBannerColor[ev.type] ?? 'bg-brand-500'}`}
                   >
-                    <span className="flex-1 whitespace-normal leading-snug line-clamp-2">{ev.title}</span>
                     <EventPlatformBadges event={ev} />
+                    <span className="flex-1 whitespace-normal leading-snug line-clamp-2">{ev.title}</span>
                     <span className="shrink-0 whitespace-nowrap text-[10px] opacity-90">{ev.time}</span>
                   </button>
                 ))}
@@ -688,7 +688,7 @@ export default function CalendarPage() {
       </div>
 
       {selectedWithImages && (
-        <div className="w-full space-y-4 rounded-lg border border-neutral-200 bg-white p-4 lg:w-80 lg:shrink-0">
+        <div className="flex w-full flex-col gap-7 rounded-lg border border-neutral-200 bg-white p-4 lg:w-80 lg:shrink-0">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-black">Post Details</h3>
             <button
@@ -729,8 +729,8 @@ export default function CalendarPage() {
               {selectedWithImages.date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })} @ {selectedWithImages.time} – {selectedWithImages.endTime}
             </p>
             <p className="mt-1 text-sm font-semibold text-black">{selectedWithImages.title}</p>
-            <p className="mt-1 line-clamp-3 text-sm text-neutral-500">{selectedWithImages.description}</p>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <p className="mt-1.5 line-clamp-3 text-sm text-neutral-500">{selectedWithImages.description}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
               {selectedWithImages.hashtags.map((tag, i) => (
                 <span
                   key={tag}
@@ -742,8 +742,8 @@ export default function CalendarPage() {
             </div>
           </div>
 
-          <div>
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-widest text-neutral-400">
+          <div className="mt-1">
+            <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-widest text-neutral-400">
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
@@ -768,7 +768,7 @@ export default function CalendarPage() {
             </div>
           </div>
 
-          <div className="rounded-lg bg-neutral-50 p-3">
+          <div className="mt-1 rounded-lg bg-neutral-50 p-3.5">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-[10px] font-semibold tracking-widest text-neutral-400">
                 AUDIENCE SENTIMENT FORECAST
@@ -788,7 +788,7 @@ export default function CalendarPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="mt-auto flex items-center gap-2 pt-2">
             <button
               onClick={() => selectedWithImages.relatedId && navigate(`/approval-queue/${selectedWithImages.relatedId}/edit`)}
               className={`flex-1 rounded-md px-3 py-2 text-sm font-medium ring-1 ring-neutral-200 hover:bg-neutral-50 ${
