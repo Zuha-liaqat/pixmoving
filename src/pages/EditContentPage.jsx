@@ -112,9 +112,9 @@ export default function EditContentPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
         {/* Left: editor */}
-        <div className="space-y-5 rounded-lg border border-neutral-200 bg-white p-5">
+        <div className="h-full space-y-5 rounded-lg border border-neutral-200 bg-white p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-black">Edit Content</h2>
             <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-neutral-500">
@@ -126,10 +126,18 @@ export default function EditContentPage() {
             <p className="mb-2 text-xs font-semibold tracking-widest text-neutral-400">
               PRIMARY MEDIA
             </p>
-            <div className={`relative flex h-44 items-center justify-center overflow-hidden rounded-lg border border-dashed border-neutral-300 ${item.thumbClass}`}>
-              <span className="select-none text-6xl font-bold text-white/70">
-                {item.title?.charAt(0).toUpperCase()}
-              </span>
+            <div className={`relative flex h-44 items-center justify-center overflow-hidden rounded-lg border border-dashed border-neutral-300 ${item.images?.length ? 'bg-neutral-100' : item.thumbClass}`}>
+              {item.images?.length ? (
+                <img
+                  src={item.images[0].dataUri}
+                  alt={item.images[0].name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="select-none text-6xl font-bold text-white/70">
+                  {item.title?.charAt(0).toUpperCase()}
+                </span>
+              )}
               <button
                 aria-label="Change media"
                 className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-neutral-600 shadow-sm hover:text-black"
@@ -153,7 +161,7 @@ export default function EditContentPage() {
             <textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              rows={5}
+              rows={10}
               className="w-full resize-none rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-700 outline-none focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/15"
             />
           </div>
@@ -215,7 +223,7 @@ export default function EditContentPage() {
               CHANNELS
             </p>
             <div className="flex flex-wrap gap-2">
-              {Object.keys(channelMeta).map((name) => {
+              {item.channels.map((name) => {
                 const active = channels.includes(name)
                 return (
                   <button

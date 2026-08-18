@@ -203,7 +203,7 @@ function ListView({ items, onPreview, onEdit, onDelete, selectedIds, onToggle, o
                           <img
                             src={item.images[0].dataUri}
                             alt={item.images[0].name}
-                            className="h-full w-full object-contain"
+                            className="h-full w-full object-cover"
                           />
                         ) : (
                           item.thumbLabel?.slice(0, 4) || getInitials(item.title)

@@ -19,7 +19,7 @@ export default function LoginPage() {
     // TODO: wire up to auth API
     setTimeout(() => {
       setSubmitting(false)
-      navigate('/library')
+      navigate('/dashboard')
     }, 500)
   }
 
@@ -33,13 +33,13 @@ export default function LoginPage() {
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-linear-to-br from-black/80 via-black/50 to-black/80" />
-        <div className="relative z-10 flex h-full flex-col justify-end p-12">
+        {/* <div className="relative z-10 flex h-full flex-col justify-end p-12">
           <h2 className="text-3xl font-bold text-white">Content Engine</h2>
           <p className="mt-3 max-w-sm text-sm text-white/70">
             Manage, review, and publish PIX Moving's autonomous mobility
             content across every channel — from one place.
           </p>
-        </div>
+        </div> */}
       </div>
 
       {/* Right: login form */}
@@ -195,7 +195,7 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => navigate('/library')}
+            onClick={() => navigate('/dashboard')}
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-200 py-2.5 text-sm font-medium text-neutral-700 shadow-sm transition hover:border-neutral-300 hover:bg-neutral-50 hover:shadow"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24">

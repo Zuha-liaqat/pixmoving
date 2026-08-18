@@ -276,6 +276,49 @@ function PostImages({ item, initials, platform, className = '' }) {
   return <PostImage item={item} initials={initials} className={className} />
 }
 
+function TruncatedCaption({ prefix, text, hashtags, hashtagClass, limit = 100 }) {
+  const [expanded, setExpanded] = useState(false)
+  const isLong = text.length > limit
+  const shown = expanded || !isLong ? text : `${text.slice(0, limit).trimEnd()}...`
+
+  return (
+    <>
+      {prefix}
+      {shown}
+      {!expanded && isLong && (
+        <>
+          {' '}
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="font-medium text-neutral-400 hover:text-neutral-600"
+          >
+            more
+          </button>
+        </>
+      )}
+      {(expanded || !isLong) && hashtags && (
+        <>
+          {' '}
+          <span className={hashtagClass}>{hashtags}</span>
+        </>
+      )}
+      {expanded && isLong && (
+        <>
+          {' '}
+          <button
+            type="button"
+            onClick={() => setExpanded(false)}
+            className="font-medium text-neutral-400 hover:text-neutral-600"
+          >
+            less
+          </button>
+        </>
+      )}
+    </>
+  )
+}
+
 function StoryAvatar({ initials, size = 'h-8 w-8', text = 'text-[10px]' }) {
   return (
     <div className={`shrink-0 rounded-full ${avatarGradient} p-[2px]`}>
@@ -321,8 +364,13 @@ function InstagramMobile({ item, initials }) {
 
       <p className="px-3 pt-1.5 text-[11px] font-semibold text-black">1,284 likes</p>
       <p className="px-3 pt-0.5 text-[11px] leading-snug text-neutral-800">
-        <span className="font-semibold text-black">pixmoving</span> {item.caption}{' '}
-        <span className="text-[#0a55a0]">{item.hashtags.join(' ')}</span>
+        <TruncatedCaption
+          prefix={<span className="font-semibold text-black">pixmoving </span>}
+          text={item.caption}
+          hashtags={item.hashtags.join(' ')}
+          hashtagClass="text-[#0a55a0]"
+          limit={90}
+        />
       </p>
       <p className="px-3 pt-0.5 text-[11px] text-neutral-500">View all 24 comments</p>
 
@@ -362,8 +410,13 @@ function InstagramWeb({ item, initials }) {
             </div>
             <div className="flex-1 space-y-2 px-3 py-2.5">
               <p className="text-xs leading-relaxed text-neutral-800">
-                <span className="font-semibold text-black">pixmoving</span> {item.caption}{' '}
-                <span className="text-[#0a55a0]">{item.hashtags.join(' ')}</span>
+                <TruncatedCaption
+                  prefix={<span className="font-semibold text-black">pixmoving </span>}
+                  text={item.caption}
+                  hashtags={item.hashtags.join(' ')}
+                  hashtagClass="text-[#0a55a0]"
+                  limit={90}
+                />
               </p>
               <p className="text-[11px] text-neutral-400">View all 24 comments</p>
               {[0, 1, 2].map((i) => (
@@ -419,7 +472,9 @@ function LinkedInMobile({ item, initials }) {
           </button>
         </div>
 
-        <p className="whitespace-pre-line px-3 pt-2.5 text-[11px] leading-relaxed text-neutral-800">{item.caption}</p>
+        <p className="whitespace-pre-line px-3 pt-2.5 text-[11px] leading-relaxed text-neutral-800">
+          <TruncatedCaption text={item.caption} limit={150} />
+        </p>
 
         <div className="mt-2">
           <PostImages item={item} initials={initials} platform="LinkedIn" textSize="text-3xl" className="h-48" />
@@ -476,7 +531,9 @@ function LinkedInWeb({ item, initials }) {
               </button>
             </div>
 
-            <p className="whitespace-pre-line px-4 pt-3 text-[13px] leading-relaxed text-neutral-800">{item.caption}</p>
+            <p className="whitespace-pre-line px-4 pt-3 text-[13px] leading-relaxed text-neutral-800">
+              <TruncatedCaption text={item.caption} limit={200} />
+            </p>
 
             <div className="mt-3">
               <PostImages item={item} initials={initials} platform="LinkedIn" textSize="text-4xl" className="h-44" />
@@ -549,7 +606,12 @@ function TwitterMobile({ item, initials }) {
             <span className="text-xs text-neutral-500">@pixmoving · 2h</span>
           </div>
           <p className="mt-1 whitespace-pre-line text-[12px] leading-snug text-neutral-800">
-            {item.caption} <span className="text-[#1d9bf0]">{item.hashtags.join(' ')}</span>
+            <TruncatedCaption
+              text={item.caption}
+              hashtags={item.hashtags.join(' ')}
+              hashtagClass="text-[#1d9bf0]"
+              limit={140}
+            />
           </p>
         </div>
       </div>
@@ -598,7 +660,12 @@ function TwitterWeb({ item, initials }) {
               <span className="text-[13px] text-neutral-500">@pixmoving · 2h</span>
             </div>
             <p className="mt-1 whitespace-pre-line text-[14px] leading-relaxed text-neutral-800">
-              {item.caption} <span className="text-[#1d9bf0]">{item.hashtags.join(' ')}</span>
+              <TruncatedCaption
+                text={item.caption}
+                hashtags={item.hashtags.join(' ')}
+                hashtagClass="text-[#1d9bf0]"
+                limit={180}
+              />
             </p>
             <div className="mt-3">
               <PostImages
@@ -706,20 +773,26 @@ export default function PostPreviewModal({ item, onClose }) {
         </div>
 
         <div className="mb-3 flex items-center gap-1.5 rounded-lg bg-neutral-100 p-1">
-          {platforms.map((p) => (
-            <button
-              key={p.key}
-              onClick={() => setTab(p.key)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${
-                tab === p.key
-                  ? 'bg-white text-black shadow-sm ring-1 ring-neutral-200'
-                  : 'text-neutral-500 hover:bg-white/60 hover:text-black'
-              }`}
-            >
-              {p.icon}
-              {p.label}
-            </button>
-          ))}
+          {platforms.map((p) => {
+            const enabled = p.key === item.platform
+            return (
+              <button
+                key={p.key}
+                disabled={!enabled}
+                onClick={() => enabled && setTab(p.key)}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${
+                  !enabled
+                    ? 'cursor-not-allowed text-neutral-300'
+                    : tab === p.key
+                      ? 'bg-white text-black shadow-sm ring-1 ring-neutral-200'
+                      : 'text-neutral-500 hover:bg-white/60 hover:text-black'
+                }`}
+              >
+                {p.icon}
+                {p.label}
+              </button>
+            )
+          })}
         </div>
 
         <div className="mb-4 flex items-center justify-center gap-1.5 rounded-lg bg-neutral-100 p-1">

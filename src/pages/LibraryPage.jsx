@@ -195,7 +195,7 @@ export default function LibraryPage() {
                     onClick={() => setActiveCategory((prev) => (prev === cat ? null : cat))}
                     className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
                       active
-                        ? 'bg-blue-600 text-white shadow-sm shadow-blue-200'
+                        ? 'bg-brand-500 text-white shadow-sm shadow-brand-200'
                         : 'bg-neutral-50 text-neutral-600 ring-1 ring-inset ring-neutral-200 hover:bg-neutral-100'
                     }`}
                   >
