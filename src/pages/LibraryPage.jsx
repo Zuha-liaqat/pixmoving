@@ -241,7 +241,6 @@ export default function LibraryPage() {
       {/* Header row */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-black">Media Assets</h2>
           <p className="text-sm text-neutral-500">
             {status === 'ready'
               ? activeType === 'all' && !activeCategory

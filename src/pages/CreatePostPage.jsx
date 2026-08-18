@@ -271,13 +271,10 @@ export default function CreatePostPage() {
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-black">Generate Post</h2>
-          <p className="mt-1 text-sm text-neutral-500">
-            Describe the content you want to create and let AI assist you.
-          </p>
-        </div>
+      <div className="flex flex-wrap items-end justify-end gap-4">
+        {/* <p className="text-sm text-neutral-500">
+          Describe the content you want to create and let AI assist you.
+        </p> */}
         <button
           onClick={handleGenerate}
           disabled={!prompt.trim() || isGenerating}

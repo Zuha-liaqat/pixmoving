@@ -136,8 +136,7 @@ export default function NotificationsPage() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-bold text-black sm:text-xl">Notifications</h2>
-          <p className="mt-0.5 text-xs text-neutral-500 sm:mt-1 sm:text-sm">
+          <p className="text-xs text-neutral-500 sm:text-sm">
             {unreadCount > 0
               ? `You have ${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`
               : 'All caught up — no unread notifications'}

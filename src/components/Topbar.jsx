@@ -1,8 +1,30 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { getUnreadCount } from '../data/notifications'
 
+const pageTitles = [
+  { match: '/dashboard', label: 'Dashboard' },
+  { match: '/create-post', label: 'Create Post' },
+  { match: '/themes', label: 'Themes' },
+  { match: '/library', label: 'Library' },
+  { match: '/approval-queue', label: 'Approval Queue' },
+  { match: '/calendar', label: 'Calendar' },
+  { match: '/notifications', label: 'Notifications' },
+  { match: '/settings', label: 'Settings' },
+]
+
+function getPageTitle(pathname) {
+  if (pathname.startsWith('/approval-queue/') && pathname.endsWith('/edit')) {
+    return 'Edit Content'
+  }
+  const found = pageTitles.find(
+    (p) => pathname === p.match || pathname.startsWith(`${p.match}/`),
+  )
+  return found?.label ?? 'Dashboard'
+}
+
 export default function Topbar({ onMenuClick = () => {} }) {
+  const location = useLocation()
   const [unread, setUnread] = useState(() => getUnreadCount())
 
   useEffect(() => {
@@ -24,28 +46,13 @@ export default function Topbar({ onMenuClick = () => {} }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
         </svg>
       </button>
-      <div className="flex w-full min-w-0 max-w-md items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 transition focus-within:border-brand-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-500/20">
-        <svg
-          className="h-4 w-4 shrink-0 text-neutral-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.75}
-            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-          />
-        </svg>
-        <input
-          type="text"
-          placeholder="Search assets, metadata, or tags..."
-          className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-neutral-400"
-        />
+      <div className="flex w-full min-w-0 max-w-md items-center">
+        <h1 className="truncate text-lg font-semibold text-black">
+          {getPageTitle(location.pathname)}
+        </h1>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-6">
         <Link
           to="/notifications"
           className="relative rounded-full p-1.5 text-neutral-500 transition hover:bg-neutral-100 hover:text-black"
@@ -65,7 +72,7 @@ export default function Topbar({ onMenuClick = () => {} }) {
             </span>
           )}
         </Link>
-        <button
+        {/* <button
           className="rounded-full p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-black"
           aria-label="Help"
         >
@@ -77,7 +84,7 @@ export default function Topbar({ onMenuClick = () => {} }) {
               d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.86.416-1.45 1.235-1.45 2.161v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
             />
           </svg>
-        </button>
+        </button> */}
         <div className="ml-2 flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-xs font-semibold text-white ring-2 ring-white shadow-sm">
             AM
