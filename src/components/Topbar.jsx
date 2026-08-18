@@ -52,7 +52,7 @@ export default function Topbar({ onMenuClick = () => {} }) {
         </h1>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1 sm:gap-6">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-4">
         <Link
           to="/notifications"
           className="relative rounded-full p-1.5 text-neutral-500 transition hover:bg-neutral-100 hover:text-black"
