@@ -98,7 +98,7 @@ function StatusPill({ status }) {
   )
 }
 
-function ActionButtons({ compact, onPreview, onEdit, onDelete, deleting }) {
+function ActionButtons({ compact, onPreview, onEdit, onDelete, onApprove, approved, deleting }) {
   return (
     <div className={`flex items-center gap-2 ${compact ? '' : 'justify-end'}`}>
       <button
@@ -116,6 +116,27 @@ function ActionButtons({ compact, onPreview, onEdit, onDelete, deleting }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       </button>
+      {onApprove && (
+        <button
+          onClick={onApprove}
+          disabled={approved}
+          aria-label={approved ? 'Approved' : 'Approve'}
+          className={`flex h-8 w-8 items-center justify-center rounded-md border transition ${
+            approved
+              ? 'cursor-default border-emerald-200 bg-emerald-50 text-emerald-600'
+              : 'border-neutral-200 text-neutral-500 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600'
+          }`}
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.75}
+              d="M4.5 12.75l6 6 9-13.5"
+            />
+          </svg>
+        </button>
+      )}
       <button
         onClick={onEdit}
         aria-label="Edit"
@@ -149,7 +170,7 @@ function ActionButtons({ compact, onPreview, onEdit, onDelete, deleting }) {
   )
 }
 
-function ListView({ items, onPreview, onEdit, onDelete, selectedIds, onToggle, onToggleAll, deletingId }) {
+function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, onToggle, onToggleAll, deletingId }) {
   const allSelected = items.length > 0 && items.every((item) => selectedIds.has(item.id))
 
   return (
@@ -231,6 +252,8 @@ function ListView({ items, onPreview, onEdit, onDelete, selectedIds, onToggle, o
                       onPreview={() => onPreview(item)}
                       onEdit={() => onEdit(item.id)}
                       onDelete={() => onDelete(item.id)}
+                      onApprove={() => onApprove(item.id)}
+                      approved={item.status === 'PRODUCTION'}
                       deleting={deletingId === item.id}
                     />
                   </td>
@@ -280,7 +303,7 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
                   <img
                     src={item.images[0].dataUri}
                     alt={item.images[0].name}
-                    className="h-full w-full object-contain"
+                    className="h-full w-full object-cover"
                   />
                 ) : (
                   <>
@@ -579,6 +602,7 @@ export default function ApprovalQueuePage() {
             onPreview={setPreviewItem}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onApprove={handleApprove}
             selectedIds={selectedIds}
             onToggle={handleToggle}
             onToggleAll={handleToggleAll}
