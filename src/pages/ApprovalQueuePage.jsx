@@ -267,6 +267,27 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
   )
 }
 
+function TruncatedText({ text, limit = 140 }) {
+  const [expanded, setExpanded] = useState(false)
+  const isLong = text.length > limit
+  const shown = expanded || !isLong ? text : `${text.slice(0, limit).trimEnd()}...`
+
+  return (
+    <>
+      {shown}
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="ml-1 font-medium text-brand-600 hover:underline"
+        >
+          {expanded ? 'less' : 'more'}
+        </button>
+      )}
+    </>
+  )
+}
+
 function getMeta(item) {
   if (item.platform === 'Instagram') return `Carousel (${item.hashtags.length + 1})`
   if (item.platform === 'Twitter') return `${item.caption.length} Characters`
@@ -315,7 +336,9 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
 
               <div className="flex flex-1 flex-col gap-2 p-3">
                 <p className="text-sm font-bold text-black">{item.title}</p>
-                <p className="flex-1 text-sm text-neutral-600">{item.caption}</p>
+                <p className="flex-1 text-sm text-neutral-600">
+                  <TruncatedText text={item.caption} limit={280} />
+                </p>
                 <p className="text-sm text-sky-600">{item.hashtags.join(' ')}</p>
               </div>
 

@@ -48,6 +48,7 @@ const fallbackIcon = {
 
 function Thumbnail({ type, mediaType, thumbClass, imageUrl, children }) {
   const [imgError, setImgError] = useState(false)
+  const [imgLoaded, setImgLoaded] = useState(false)
   const showImage = mediaType === 'photo' && imageUrl && !imgError
 
   return (
@@ -57,13 +58,22 @@ function Thumbnail({ type, mediaType, thumbClass, imageUrl, children }) {
       }`}
     >
       {showImage ? (
-        <img
-          src={imageUrl}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-          loading="lazy"
-          onError={() => setImgError(true)}
-        />
+        <>
+          {!imgLoaded && (
+            <div className="absolute inset-0 animate-pulse bg-neutral-200" />
+          )}
+          <img
+            src={imageUrl}
+            alt=""
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
+              imgLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
+          />
+        </>
       ) : (
         fallbackIcon[mediaType] ?? fallbackIcon.article
       )}
