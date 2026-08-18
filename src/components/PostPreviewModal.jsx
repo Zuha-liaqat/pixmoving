@@ -730,20 +730,20 @@ function BrowserFrame({ children, url }) {
 }
 
 const platforms = [
-  { key: 'LinkedIn', label: 'LinkedIn', Mobile: LinkedInMobile, Web: LinkedInWeb, url: 'linkedin.com/feed', icon: (
-    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="#0A66C2">
+  { key: 'LinkedIn', label: 'LinkedIn', activeColor: 'text-[#0A66C2]', Mobile: LinkedInMobile, Web: LinkedInWeb, url: 'linkedin.com/feed', icon: (
+    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
       <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
     </svg>
   )},
-  { key: 'Instagram', label: 'Instagram', Mobile: InstagramMobile, Web: InstagramWeb, url: 'instagram.com', icon: (
-    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
-      <rect x="4" y="4" width="16" height="16" rx="4" stroke="#E1306C" strokeWidth="2" />
-      <circle cx="12" cy="12" r="3.5" stroke="#E1306C" strokeWidth="2" />
-      <circle cx="17.5" cy="6.5" r="1.2" fill="#E1306C" />
+  { key: 'Instagram', label: 'Instagram', activeColor: 'text-[#E1306C]', Mobile: InstagramMobile, Web: InstagramWeb, url: 'instagram.com', icon: (
+    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="4" y="4" width="16" height="16" rx="4" />
+      <circle cx="12" cy="12" r="3.5" />
+      <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none" />
     </svg>
   )},
-  { key: 'Twitter', label: 'X / Twitter', Mobile: TwitterMobile, Web: TwitterWeb, url: 'x.com/home', icon: (
-    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="black">
+  { key: 'Twitter', label: 'X / Twitter', activeColor: 'text-black', Mobile: TwitterMobile, Web: TwitterWeb, url: 'x.com/home', icon: (
+    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
     </svg>
   )},
@@ -759,7 +759,7 @@ export default function PostPreviewModal({ item, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div
-        className={`w-full rounded-xl bg-white p-4 shadow-2xl transition-all max-h-[calc(100vh-2rem)] overflow-y-auto ${
+        className={`w-full rounded-xl border border-neutral-200 bg-white p-4 shadow-2xl transition-all max-h-[calc(100vh-2rem)] overflow-y-auto ${
           device === 'mobile' ? 'max-w-[420px]' : 'max-w-3xl'
         }`}
       >
@@ -772,7 +772,7 @@ export default function PostPreviewModal({ item, onClose }) {
           </button>
         </div>
 
-        <div className="mb-3 flex items-center gap-1.5 rounded-lg bg-neutral-100 p-1">
+        <div className="mb-3 flex items-center gap-2 rounded-lg bg-neutral-100 p-1.5">
           {platforms.map((p) => {
             const enabled = p.key === item.platform
             return (
@@ -780,12 +780,12 @@ export default function PostPreviewModal({ item, onClose }) {
                 key={p.key}
                 disabled={!enabled}
                 onClick={() => enabled && setTab(p.key)}
-                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-semibold ring-1 transition-all ${
                   !enabled
                     ? 'cursor-not-allowed text-neutral-300'
                     : tab === p.key
-                      ? 'bg-white text-black shadow-sm ring-1 ring-neutral-200'
-                      : 'text-neutral-500 hover:bg-white/60 hover:text-black'
+                      ? `bg-white shadow-md ring-1 ring-neutral-200 ${p.activeColor}`
+                      : 'bg-transparent text-neutral-400 ring-transparent hover:bg-[#0A66C2]/10 hover:text-[#0A66C2]'
                 }`}
               >
                 {p.icon}
@@ -795,13 +795,13 @@ export default function PostPreviewModal({ item, onClose }) {
           })}
         </div>
 
-        <div className="mb-4 flex items-center justify-center gap-1.5 rounded-lg bg-neutral-100 p-1">
+        <div className="mb-4 flex w-fit mx-auto items-center gap-1.5 rounded-lg bg-neutral-100 p-1">
           <button
             onClick={() => setDevice('mobile')}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${
+            className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${
               device === 'mobile'
                 ? 'bg-white text-black shadow-sm ring-1 ring-neutral-200'
-                : 'text-neutral-500 hover:bg-white/60 hover:text-black'
+                : 'text-neutral-500 hover:bg-[#0A66C2]/10 hover:text-[#0A66C2]'
             }`}
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -816,10 +816,10 @@ export default function PostPreviewModal({ item, onClose }) {
           </button>
           <button
             onClick={() => setDevice('web')}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${
+            className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${
               device === 'web'
                 ? 'bg-white text-black shadow-sm ring-1 ring-neutral-200'
-                : 'text-neutral-500 hover:bg-white/60 hover:text-black'
+                : 'text-neutral-500 hover:bg-[#0A66C2]/10 hover:text-[#0A66C2]'
             }`}
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
