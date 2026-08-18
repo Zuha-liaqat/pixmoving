@@ -294,7 +294,7 @@ function getMeta(item) {
   return `${item.caption.trim().split(/\s+/).length} Words`
 }
 
-function GridView({ items, onPreview, onEdit, onApprove }) {
+function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId }) {
   const approvedCount = items.filter((item) => item.status === 'PRODUCTION').length
 
   return (
@@ -312,7 +312,24 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
                   {platformIcons[item.platform]}
                   <span className="text-sm font-semibold text-black">{item.platform} Draft</span>
                 </div>
-                <span className="text-xs text-neutral-400">{getMeta(item)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-neutral-400">{getMeta(item)}</span>
+                  <button
+                    onClick={() => onDelete(item.id)}
+                    disabled={deletingId === item.id}
+                    aria-label="Delete"
+                    className="flex h-6 w-6 items-center justify-center rounded text-neutral-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.75}
+                        d="M14.74 9l-.346 9m-4.788 0L9.26 9M19.228 5.79c1.121.113 2.235.256 3.34.428m-3.34-.428L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c1.105-.172 2.219-.315 3.34-.428m0 0a48.108 48.108 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
               <div
@@ -631,7 +648,14 @@ export default function ApprovalQueuePage() {
             deletingId={deletingId}
           />
         ) : (
-          <GridView items={items} onPreview={setPreviewItem} onEdit={handleEdit} onApprove={handleApprove} />
+          <GridView
+            items={items}
+            onPreview={setPreviewItem}
+            onEdit={handleEdit}
+            onApprove={handleApprove}
+            onDelete={handleDelete}
+            deletingId={deletingId}
+          />
         )
       )}
 
