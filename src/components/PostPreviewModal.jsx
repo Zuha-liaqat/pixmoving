@@ -787,20 +787,27 @@ export default function PostPreviewModal({ item, onClose }) {
           </button>
         </div>
 
-        <div className="mb-3 flex items-center gap-1.5 rounded-lg bg-neutral-100 p-1">
-          {platforms.map((p) => (
-            <button
-              key={p.key}
-              onClick={() => setTab(p.key)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${tab === p.key
-                ? 'bg-white text-black shadow-sm ring-1 ring-neutral-200'
-                : 'text-neutral-500 hover:bg-white/60 hover:text-black'
+        <div className="mb-3 flex items-center gap-2 rounded-lg bg-neutral-100 p-1.5">
+          {platforms.map((p) => {
+            const enabled = p.key === item.platform
+            return (
+              <button
+                key={p.key}
+                disabled={!enabled}
+                onClick={() => enabled && setTab(p.key)}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-semibold ring-1 transition-all ${
+                  !enabled
+                    ? 'cursor-not-allowed text-neutral-300'
+                    : tab === p.key
+                      ? `bg-white shadow-md ring-1 ring-neutral-200 ${p.activeColor}`
+                      : 'bg-transparent text-neutral-400 ring-transparent hover:bg-[#0A66C2]/10 hover:text-[#0A66C2]'
                 }`}
-            >
-              {p.icon}
-              {p.label}
-            </button>
-          ))}
+              >
+                {p.icon}
+                {p.label}
+              </button>
+            )
+          })}
         </div>
 
         <div className="mb-4 flex w-fit mx-auto items-center gap-1.5 rounded-lg bg-neutral-100 p-1">
