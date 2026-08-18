@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { curationInsights } from '../data/queueItems'
-import { getQueueItemById, updateGeneratedPost } from '../data/posts'
+import { fetchGeneratedPost } from '../lib/api'
+import { mapApiPost } from '../lib/postMapper'
 
 const channelMeta = {
   Instagram: (
@@ -28,14 +29,37 @@ export default function EditContentPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const backTo = searchParams.get('view') === 'grid' ? '/approval-queue?view=grid' : '/approval-queue'
-  const item = getQueueItemById(id)
 
-  const [caption, setCaption] = useState(item?.caption ?? '')
-  const [hashtags, setHashtags] = useState(item?.hashtags ?? [])
-  const [channels, setChannels] = useState(item?.channels ?? [])
+  const [item, setItem] = useState(null)
+  const [status, setStatus] = useState('loading')
+  const [caption, setCaption] = useState('')
+  const [hashtags, setHashtags] = useState([])
+  const [channels, setChannels] = useState([])
   const [newTag, setNewTag] = useState('')
 
-  if (!item) {
+  useEffect(() => {
+    setStatus('loading')
+    fetchGeneratedPost(id)
+      .then((data) => {
+        const mapped = mapApiPost(data)
+        setItem(mapped)
+        setCaption(mapped.caption)
+        setHashtags(mapped.hashtags)
+        setChannels(mapped.channels)
+        setStatus('ready')
+      })
+      .catch(() => setStatus('error'))
+  }, [id])
+
+  if (status === 'loading') {
+    return (
+      <div className="rounded-lg border border-dashed border-neutral-300 p-10 text-center">
+        <p className="text-sm text-neutral-500">Loading post…</p>
+      </div>
+    )
+  }
+
+  if (status === 'error' || !item) {
     return (
       <div className="rounded-lg border border-dashed border-neutral-300 p-10 text-center">
         <p className="text-sm text-neutral-500">Post not found.</p>
@@ -65,7 +89,6 @@ export default function EditContentPage() {
   const scoreDeg = curationInsights.score * 3.6
 
   function handleSave() {
-    updateGeneratedPost(id, { caption, hashtags, channels })
     navigate(backTo)
   }
 

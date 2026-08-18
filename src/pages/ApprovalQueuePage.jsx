@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
-import { getAllQueueItems, removeGeneratedPost, updateGeneratedPost } from '../data/posts'
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { addNotification } from '../data/notifications'
 import PostPreviewModal from '../components/PostPreviewModal'
+import { deleteGeneratedPost, fetchGeneratedPosts } from '../lib/api'
+import { mapApiPost } from '../lib/postMapper'
 
 const platformIcons = {
   Twitter: (
@@ -97,7 +98,7 @@ function StatusPill({ status }) {
   )
 }
 
-function ActionButtons({ compact, onPreview, onEdit, onDelete }) {
+function ActionButtons({ compact, onPreview, onEdit, onDelete, deleting }) {
   return (
     <div className={`flex items-center gap-2 ${compact ? '' : 'justify-end'}`}>
       <button
@@ -131,8 +132,9 @@ function ActionButtons({ compact, onPreview, onEdit, onDelete }) {
       </button>
       <button
         onClick={onDelete}
+        disabled={deleting}
         aria-label="Delete"
-        className="flex h-8 w-8 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-600 transition hover:border-red-300 hover:bg-red-100"
+        className="flex h-8 w-8 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-600 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -147,7 +149,7 @@ function ActionButtons({ compact, onPreview, onEdit, onDelete }) {
   )
 }
 
-function ListView({ items, onPreview, onEdit, onDelete, selectedIds, onToggle, onToggleAll }) {
+function ListView({ items, onPreview, onEdit, onDelete, selectedIds, onToggle, onToggleAll, deletingId }) {
   const allSelected = items.length > 0 && items.every((item) => selectedIds.has(item.id))
 
   return (
@@ -167,7 +169,7 @@ function ListView({ items, onPreview, onEdit, onDelete, selectedIds, onToggle, o
               <th className="px-3 py-3.5">POST PREVIEW</th>
               <th className="px-3 py-3.5">PLATFORM</th>
               <th className="px-3 py-3.5">AI SAFETY SCORE</th>
-              <th className="px-3 py-3.5">BATCH STATUS</th>
+              <th className="px-3 py-3.5">LANGUAGE</th>
               <th className="px-3 py-3.5">TIMESTAMP</th>
               <th className="px-3 py-3.5 text-right">ACTIONS</th>
             </tr>
@@ -222,15 +224,14 @@ function ListView({ items, onPreview, onEdit, onDelete, selectedIds, onToggle, o
                   <td className="px-3 py-3.5">
                     <ScoreBar score={item.score} />
                   </td>
-                  <td className="px-3 py-3.5">
-                    <StatusPill status={item.status} />
-                  </td>
+                  <td className="px-3 py-3.5 text-neutral-600">{item.language || '—'}</td>
                   <td className="px-3 py-3.5 whitespace-nowrap text-neutral-500">{item.timestamp}</td>
                   <td className="px-3 py-3.5">
                     <ActionButtons
                       onPreview={() => onPreview(item)}
                       onEdit={() => onEdit(item.id)}
                       onDelete={() => onDelete(item.id)}
+                      deleting={deletingId === item.id}
                     />
                   </td>
                 </tr>
@@ -381,19 +382,30 @@ function GridView({ items, onPreview, onEdit, onApprove }) {
 
 export default function ApprovalQueuePage() {
   const navigate = useNavigate()
-  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const view = searchParams.get('view') === 'grid' ? 'grid' : 'list'
-  const newPost = location.state?.newPost
-  const [items, setItems] = useState(() => {
-    const base = getAllQueueItems()
-    if (newPost && !base.some((p) => p.id === newPost.id)) {
-      return [newPost, ...base]
-    }
-    return base
-  })
+  const [items, setItems] = useState([])
+  const [status, setStatus] = useState('loading')
   const [selectedIds, setSelectedIds] = useState(new Set())
   const [previewItem, setPreviewItem] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
+
+  const loadItems = useCallback(() => {
+    setStatus((prev) => (prev === 'ready' ? 'ready' : 'loading'))
+    return fetchGeneratedPosts()
+      .then((data) => {
+        const posts = Array.isArray(data?.posts) ? data.posts : Array.isArray(data) ? data : []
+        setItems(posts.map(mapApiPost))
+        setStatus('ready')
+      })
+      .catch(() => {
+        setStatus('error')
+      })
+  }, [])
+
+  useEffect(() => {
+    loadItems()
+  }, [loadItems])
 
   function setView(next) {
     setSearchParams(next === 'list' ? {} : { view: next })
@@ -403,15 +415,22 @@ export default function ApprovalQueuePage() {
     navigate(`/approval-queue/${id}/edit?view=${view}`)
   }
 
-  function handleDelete(id) {
+  async function handleDelete(id) {
     if (!window.confirm('Delete this post? This cannot be undone.')) return
-    removeGeneratedPost(id)
-    setItems((prev) => prev.filter((item) => item.id !== id))
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      next.delete(id)
-      return next
-    })
+    setDeletingId(id)
+    try {
+      await deleteGeneratedPost(id)
+      setItems((prev) => prev.filter((item) => item.id !== id))
+      setSelectedIds((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+    } catch (err) {
+      window.alert(err.message)
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   function handleToggle(id) {
@@ -435,7 +454,6 @@ export default function ApprovalQueuePage() {
 
   function handleBatchApprove() {
     const count = selectedIds.size
-    selectedIds.forEach((id) => updateGeneratedPost(id, { status: 'PRODUCTION' }))
     setItems((prev) => {
       const approved = prev.filter((i) => selectedIds.has(i.id))
       if (approved.length > 0) {
@@ -455,7 +473,6 @@ export default function ApprovalQueuePage() {
   }
 
   function handleApprove(id) {
-    updateGeneratedPost(id, { status: 'PRODUCTION' })
     setItems((prev) => {
       const item = prev.find((i) => i.id === id)
       if (item) {
@@ -479,11 +496,11 @@ export default function ApprovalQueuePage() {
           <div className="mt-2 flex items-center gap-2">
             <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600 ring-1 ring-emerald-200">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              24 Ready for Review
+              {items.filter((i) => i.status !== 'FLAGGED').length} Ready for Review
             </span>
             <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 ring-1 ring-amber-200">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-              12 Flagged
+              {items.filter((i) => i.status === 'FLAGGED').length} Flagged
             </span>
           </div>
         </div>
@@ -532,18 +549,44 @@ export default function ApprovalQueuePage() {
         </div>
       </div>
 
-      {view === 'list' ? (
-        <ListView
-          items={items}
-          onPreview={setPreviewItem}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          selectedIds={selectedIds}
-          onToggle={handleToggle}
-          onToggleAll={handleToggleAll}
-        />
-      ) : (
-        <GridView items={items} onPreview={setPreviewItem} onEdit={handleEdit} onApprove={handleApprove} />
+      {status === 'error' && (
+        <div className="rounded-lg border border-dashed border-red-300 bg-red-50 p-6 text-center text-sm text-red-600">
+          Couldn't load posts. Please try again later.
+        </div>
+      )}
+
+      {status === 'loading' && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-64 animate-pulse rounded-lg border border-neutral-200 bg-neutral-100"
+            />
+          ))}
+        </div>
+      )}
+
+      {status === 'ready' && items.length === 0 && (
+        <div className="rounded-lg border border-dashed border-neutral-300 p-10 text-center text-sm text-neutral-400">
+          No posts yet. Generate one to see it here.
+        </div>
+      )}
+
+      {status === 'ready' && items.length > 0 && (
+        view === 'list' ? (
+          <ListView
+            items={items}
+            onPreview={setPreviewItem}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            selectedIds={selectedIds}
+            onToggle={handleToggle}
+            onToggleAll={handleToggleAll}
+            deletingId={deletingId}
+          />
+        ) : (
+          <GridView items={items} onPreview={setPreviewItem} onEdit={handleEdit} onApprove={handleApprove} />
+        )
       )}
 
       {previewItem && (

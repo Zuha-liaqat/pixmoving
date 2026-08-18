@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { saveGeneratedPost } from '../data/posts'
 import { addNotification } from '../data/notifications'
+import { generatePost } from '../lib/api'
 
 const toneOptions = ['Professional', 'Casual', 'Enthusiastic', 'Informative', 'Humorous']
 const languageOptions = ['EN-US', 'EN-GB', 'ES', 'FR', 'DE', 'JA']
@@ -142,10 +142,11 @@ export default function CreatePostPage() {
   const [scheduleTime, setScheduleTime] = useState('')
   const [scheduleEndTime, setScheduleEndTime] = useState('')
   const [additionalDetails, setAdditionalDetails] = useState('')
-  const [selectedPlatforms, setSelectedPlatforms] = useState(['LinkedIn'])
+  const [selectedPlatform, setSelectedPlatform] = useState('LinkedIn')
   const [tags, setTags] = useState(['#PIXMoving', '#RoboBus'])
   const [newTag, setNewTag] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [generateError, setGenerateError] = useState(null)
   const [showToneDropdown, setShowToneDropdown] = useState(false)
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState([])
@@ -171,14 +172,6 @@ export default function CreatePostPage() {
       document.removeEventListener('keydown', handleEscape)
     }
   }, [])
-
-  function togglePlatform(platform) {
-    setSelectedPlatforms((prev) =>
-      prev.includes(platform)
-        ? prev.filter((p) => p !== platform)
-        : [...prev, platform]
-    )
-  }
 
   function addTag(tag) {
     const clean = tag.trim().replace(/^#*/, '#')
@@ -239,59 +232,40 @@ export default function CreatePostPage() {
     addFiles(files)
   }
 
-  function fileToDataUri(file) {
-    return new Promise((resolve) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result)
-      reader.readAsDataURL(file)
-    })
-  }
-
   async function handleGenerate() {
     if (!prompt.trim()) return
     setIsGenerating(true)
+    setGenerateError(null)
 
-    const images = await Promise.all(
-      uploadedFiles.map(async (f) => ({
-        name: f.name,
-        size: f.size,
-        dataUri: await fileToDataUri(f.file),
-      })),
-    )
+    try {
+      const result = await generatePost({
+        prompt,
+        type: selectedPlatform.toLowerCase(),
+        language,
+        tone,
+        date: scheduleDate || undefined,
+        startTime: scheduleTime || undefined,
+        endTime: scheduleEndTime || undefined,
+        files: uploadedFiles.map((f) => f.file),
+      })
 
-    // Simulate generation time
-    setTimeout(() => {
-      setIsGenerating(false)
-
-      const newPost = {
-        id: `PX-${Date.now()}`,
-        title: prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''),
-        platform: selectedPlatforms[0] || 'LinkedIn',
-        thumbClass: 'bg-gradient-to-br from-violet-200 to-fuchsia-400',
-        score: Math.floor(Math.random() * 30) + 70,
-        status: 'STAGING',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        caption: prompt,
-        hashtags: tags,
-        channels: selectedPlatforms,
-        images,
-        scheduleDate: scheduleDate || null,
-        scheduleTime: scheduleTime || null,
-        scheduleEndTime: scheduleEndTime || null,
-      }
-
-      saveGeneratedPost(newPost)
+      const generated = typeof result === 'object' && result !== null ? result : {}
+      const title = generated.headline || generated.title || prompt.slice(0, 50) + (prompt.length > 50 ? '...' : '')
 
       addNotification({
         type: 'creation',
-        title: `New ${selectedPlatforms[0] || 'LinkedIn'} post generated`,
-        description: `"${newPost.title}" has been drafted and added to the Approval Queue for review.`,
-        platform: selectedPlatforms[0] || 'LinkedIn',
+        title: `New ${selectedPlatform} post generated`,
+        description: `"${title}" has been drafted and added to the Approval Queue for review.`,
+        platform: selectedPlatform,
         author: 'Relay AI',
       })
 
-      navigate('/approval-queue', { state: { newPost } })
-    }, 3000)
+      navigate('/approval-queue')
+    } catch (err) {
+      setGenerateError(err.message)
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   return (
@@ -315,6 +289,12 @@ export default function CreatePostPage() {
           Generate
         </button>
       </div>
+
+      {generateError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+          {generateError}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {/* Left Column */}
@@ -508,7 +488,9 @@ export default function CreatePostPage() {
                 </svg>
               </span>
               <p className="text-sm font-medium text-neutral-600">Drag & drop images here</p>
-              <p className="mt-1 text-xs text-neutral-400">or click to browse (Max 5MB)</p>
+              <p className="mt-1 text-xs text-neutral-400">
+                Optional — or click to browse (Max 5MB). Skip this to auto-select from the Library.
+              </p>
             </div>
 
             {uploadedFiles.length > 0 && (
@@ -596,8 +578,8 @@ export default function CreatePostPage() {
                 >
                   <input
                     type="checkbox"
-                    checked={selectedPlatforms.includes(platform)}
-                    onChange={() => togglePlatform(platform)}
+                    checked={selectedPlatform === platform}
+                    onChange={() => setSelectedPlatform(platform)}
                     className="h-4 w-4 rounded border-neutral-300 accent-brand-500"
                   />
                   <span className="flex items-center gap-2.5">
