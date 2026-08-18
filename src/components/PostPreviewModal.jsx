@@ -473,7 +473,12 @@ function LinkedInMobile({ item, initials }) {
         </div>
 
         <p className="whitespace-pre-line px-3 pt-2.5 text-[11px] leading-relaxed text-neutral-800">
-          <TruncatedCaption text={item.caption} limit={150} />
+          <TruncatedCaption
+            text={item.caption}
+            hashtags={item.hashtags.join(' ')}
+            hashtagClass="text-[#0a66c2]"
+            limit={150}
+          />
         </p>
 
         <div className="mt-2">
@@ -532,7 +537,12 @@ function LinkedInWeb({ item, initials }) {
             </div>
 
             <p className="whitespace-pre-line px-4 pt-3 text-[13px] leading-relaxed text-neutral-800">
-              <TruncatedCaption text={item.caption} limit={200} />
+              <TruncatedCaption
+                text={item.caption}
+                hashtags={item.hashtags.join(' ')}
+                hashtagClass="text-[#0a66c2]"
+                limit={200}
+              />
             </p>
 
             <div className="mt-3">
