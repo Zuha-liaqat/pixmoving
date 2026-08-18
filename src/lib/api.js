@@ -130,6 +130,22 @@ export async function fetchGeneratedPost(postId) {
   return res.json()
 }
 
+export async function updateGeneratedPost(postId, updates) {
+  const res = await fetch(`${API_BASE_URL}/generate-post/${postId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  })
+
+  if (!res.ok) {
+    throw new Error(
+      await extractErrorMessage(res, `Failed to update post (${res.status})`),
+    )
+  }
+
+  return res.json()
+}
+
 export async function deleteGeneratedPost(postId) {
   const res = await fetch(`${API_BASE_URL}/generate-post/${postId}`, {
     method: 'DELETE',

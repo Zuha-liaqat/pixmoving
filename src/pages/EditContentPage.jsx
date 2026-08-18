@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { curationInsights } from '../data/queueItems'
-import { fetchGeneratedPost } from '../lib/api'
+import { fetchGeneratedPost, updateGeneratedPost } from '../lib/api'
 import { mapApiPost } from '../lib/postMapper'
 
 const channelMeta = {
@@ -36,6 +36,8 @@ export default function EditContentPage() {
   const [hashtags, setHashtags] = useState([])
   const [channels, setChannels] = useState([])
   const [newTag, setNewTag] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   useEffect(() => {
     setStatus('loading')
@@ -88,8 +90,20 @@ export default function EditContentPage() {
 
   const scoreDeg = curationInsights.score * 3.6
 
-  function handleSave() {
-    navigate(backTo)
+  async function handleSave() {
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await updateGeneratedPost(id, {
+        caption,
+        hashtags: hashtags.join(' '),
+      })
+      navigate(backTo)
+    } catch (err) {
+      setSaveError(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -106,11 +120,18 @@ export default function EditContentPage() {
         </button>
         <button
           onClick={handleSave}
-          className="rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
+          disabled={saving}
+          className="rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Save Changes
+          {saving ? 'SAVING…' : 'Save Changes'}
         </button>
       </div>
+
+      {saveError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+          {saveError}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
         {/* Left: editor */}
