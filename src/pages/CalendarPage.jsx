@@ -23,11 +23,26 @@ const tagColors = [
   'bg-sky-100 text-sky-700',
 ]
 
-const typeBannerColor = {
-  REEL: 'bg-fuchsia-500',
-  MOTION: 'bg-brand-500',
-  INTERIOR: 'bg-neutral-700',
-  API: 'bg-emerald-500',
+const eventColorPalette = [
+  'bg-brand-500',
+  'bg-rose-500',
+  'bg-amber-500',
+  'bg-emerald-500',
+  'bg-sky-500',
+  'bg-violet-500',
+  'bg-fuchsia-500',
+  'bg-teal-500',
+  'bg-orange-500',
+  'bg-indigo-500',
+]
+
+function pickEventColor(id) {
+  let hash = 0
+  const str = String(id)
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 31 + str.charCodeAt(i)) | 0
+  }
+  return eventColorPalette[Math.abs(hash) % eventColorPalette.length]
 }
 
 const platformLogos = {
@@ -359,7 +374,7 @@ function TimeGrid({ days, eventsByDate, today, selected, onSelect, multiDay = fa
                       }}
                       className={`absolute left-0.5 right-0.5 z-20 flex flex-col justify-center overflow-hidden rounded px-1.5 py-1 text-left text-white transition hover:opacity-90 ${
                         selected?.id === ev.id ? 'ring-2 ring-brand-500 ring-offset-1' : ''
-                      } ${ev.bannerColor ?? typeBannerColor[ev.type] ?? 'bg-brand-500'}`}
+                       } ${ev.bannerColor ?? pickEventColor(ev.id)}`}
                       style={{ top, height: Math.min(height, (END_HOUR - startHour) * HOUR_HEIGHT) }}
                     >
                       <span className="truncate text-[11px] font-semibold leading-tight">{ev.title}</span>
@@ -433,23 +448,33 @@ function MonthView({ grid, monthDate, today, eventsByDate, selected, onSelect, o
                   {date.getDate()}
                 </span>
               </div>
-              <div className="flex flex-1 flex-col gap-1 overflow-hidden">
-                {dayEvents.map((ev) => (
-                  <button
-                    key={ev.id}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onSelect(ev)
-                    }}
-                    className={`flex w-full items-center gap-1.5 rounded px-2 py-2 text-left text-[11px] font-medium text-white transition hover:opacity-90 ${
-                      selected?.id === ev.id ? 'ring-2 ring-brand-500' : ''
-                    } ${ev.bannerColor ?? typeBannerColor[ev.type] ?? 'bg-brand-500'}`}
-                  >
-                    <EventPlatformBadges event={ev} />
-                    <span className="flex-1 whitespace-normal leading-snug line-clamp-2">{ev.title}</span>
-                    <span className="shrink-0 whitespace-nowrap text-[10px] opacity-90">{ev.time}</span>
-                  </button>
-                ))}
+              <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
+                {dayEvents.map((ev) => {
+                  const count = dayEvents.length
+                  const single = count === 1
+                  return (
+                    <button
+                      key={ev.id}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onSelect(ev)
+                      }}
+                      className={`flex w-full flex-col gap-0.5 text-left font-medium text-white transition hover:opacity-90 ${
+                        single
+                          ? 'rounded pl-1 pr-1.5 py-2 text-[11px]'
+                          : 'rounded pl-0.5 pr-1 py-0.5 text-[10px]'
+                      } ${selected?.id === ev.id ? 'ring-2 ring-brand-500' : ''} ${
+                        ev.bannerColor ?? pickEventColor(ev.id)
+                      }`}
+                    >
+                      <span className="flex items-center gap-1">
+                        <EventPlatformBadges event={ev} />
+                        <span className={`whitespace-normal leading-snug ${single ? 'line-clamp-2' : 'line-clamp-1'}`}>{ev.title}</span>
+                      </span>
+                      <span className={single ? 'text-[9px] opacity-80 ml-4' : 'text-[8px] opacity-80 ml-3'}>{ev.time}</span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )
@@ -461,7 +486,10 @@ function MonthView({ grid, monthDate, today, eventsByDate, selected, onSelect, o
 
 export default function CalendarPage() {
   const navigate = useNavigate()
-  const today = useMemo(() => new Date(), [])
+  const today = useMemo(() => {
+    const now = new Date()
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  }, [])
   const [view, setView] = useState('month')
   const [anchor, setAnchor] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
   const [extraEvents, setExtraEvents] = useState([])
@@ -470,7 +498,7 @@ export default function CalendarPage() {
     const generatedPosts = getGeneratedPosts()
       .filter((p) => p.scheduleDate)
       .map((p) => {
-        const d = new Date(p.scheduleDate)
+        const d = new Date(p.scheduleDate + 'T00:00:00')
         const diffMs = d.getTime() - today.getTime()
         const dayOffset = Math.round(diffMs / (1000 * 60 * 60 * 24))
         const platform = p.platform || p.channels?.[0] || 'LinkedIn'
@@ -493,11 +521,7 @@ export default function CalendarPage() {
           audienceLabel: 'Scheduled',
           audiencePercent: 70,
           images: p.images || [],
-          bannerColor: platform === 'Instagram'
-            ? 'bg-gradient-to-r from-[#FA7E1E] via-[#D62976] to-[#4F5BD5]'
-            : platform === 'Twitter'
-              ? 'bg-black'
-              : 'bg-[#0A66C2]',
+          bannerColor: pickEventColor(p.id),
         }
       })
     return [...calendarEvents, ...extraEvents, ...generatedPosts].map((ev) => ({
@@ -588,7 +612,7 @@ export default function CalendarPage() {
       time: ev.time,
       endTime: ev.endTime,
       thumbClass: 'bg-gradient-to-br from-brand-200 to-brand-400',
-      bannerColor: 'bg-brand-500',
+      bannerColor: pickEventColor(`cal-new-${Date.now()}`),
       description: ev.description,
       hashtags: ev.hashtags,
       expectedReach: '—',
@@ -724,13 +748,15 @@ export default function CalendarPage() {
           </div>
 
           <div>
-            <p className="flex items-center gap-1.5 text-xs text-neutral-500">
-              <CalendarDays className="h-3.5 w-3.5" />
-              {selectedWithImages.date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })} @ {selectedWithImages.time} – {selectedWithImages.endTime}
+            <p className="text-sm font-semibold text-black">{selectedWithImages.title}</p>
+            <p className="mt-2.5 flex items-start gap-1.5 text-[11px] text-neutral-400">
+              <CalendarDays className="mt-px h-3 w-3 shrink-0" />
+              <span className="leading-relaxed">
+                {selectedWithImages.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}, {selectedWithImages.time} – {selectedWithImages.endTime}
+              </span>
             </p>
-            <p className="mt-1 text-sm font-semibold text-black">{selectedWithImages.title}</p>
-            <p className="mt-1.5 line-clamp-3 text-sm text-neutral-500">{selectedWithImages.description}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <p className="mt-2.5 line-clamp-3 text-xs leading-relaxed text-neutral-500">{selectedWithImages.description}</p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
               {selectedWithImages.hashtags.map((tag, i) => (
                 <span
                   key={tag}
