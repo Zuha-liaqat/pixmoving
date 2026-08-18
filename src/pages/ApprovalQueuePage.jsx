@@ -516,11 +516,11 @@ export default function ApprovalQueuePage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600 ring-1 ring-emerald-200">
+            <span className="flex items-center gap-1.5 rounded-sm bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600 ring-1 ring-emerald-200">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               {items.filter((i) => i.status !== 'FLAGGED').length} Ready for Review
             </span>
-            <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 ring-1 ring-amber-200">
+            <span className="flex items-center gap-1.5 rounded-sm bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 ring-1 ring-amber-200">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
               {items.filter((i) => i.status === 'FLAGGED').length} Flagged
             </span>
