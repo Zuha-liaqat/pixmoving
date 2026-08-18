@@ -47,7 +47,7 @@ export default function Topbar({ onMenuClick = () => {} }) {
         </svg>
       </button>
       <div className="flex w-full min-w-0 max-w-md items-center">
-        <h1 className="truncate text-lg font-semibold text-black">
+        <h1 className="truncate text-xl font-bold text-black">
           {getPageTitle(location.pathname)}
         </h1>
       </div>
