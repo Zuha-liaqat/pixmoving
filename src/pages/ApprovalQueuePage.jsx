@@ -201,11 +201,12 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
               return (
                 <tr
                   key={item.id}
-                  className={`border-b border-neutral-100 last:border-0 transition ${
+                  onClick={() => onPreview(item)}
+                  className={`cursor-pointer border-b border-neutral-100 last:border-0 transition ${
                     checked ? 'bg-brand-50' : 'hover:bg-neutral-50'
                   }`}
                 >
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={checked}
@@ -232,7 +233,6 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
                       </div>
                       <div>
                         <p className="font-medium text-black">{item.title}</p>
-                        <p className="text-xs text-neutral-400">ID: {item.id}</p>
                       </div>
                     </div>
                   </td>
@@ -247,9 +247,8 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
                   </td>
                   <td className="px-3 py-3.5 text-neutral-600">{item.language || '—'}</td>
                   <td className="px-3 py-3.5 whitespace-nowrap text-neutral-500">{item.timestamp}</td>
-                  <td className="px-3 py-3.5">
+                  <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
                     <ActionButtons
-                      onPreview={() => onPreview(item)}
                       onEdit={() => onEdit(item.id)}
                       onDelete={() => onDelete(item.id)}
                       onApprove={() => onApprove(item.id)}
