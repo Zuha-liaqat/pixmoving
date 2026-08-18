@@ -178,19 +178,6 @@ export default function EditContentPage() {
                 {item.title?.charAt(0).toUpperCase()}
               </span>
             )}
-            <button
-              aria-label="Change media"
-              className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-md bg-white/90 text-neutral-600 shadow-sm hover:text-black"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.75}
-                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"
-                />
-              </svg>
-            </button>
           </div>
         </div>
 
