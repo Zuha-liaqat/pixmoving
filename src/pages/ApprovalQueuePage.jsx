@@ -104,7 +104,7 @@ function ActionButtons({ compact, onPreview, onEdit, onDelete, onApprove, approv
       <button
         onClick={onPreview}
         aria-label="Preview"
-        className="flex h-8 w-8 items-center justify-center rounded-md border border-neutral-200 text-neutral-500 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-black"
+        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-neutral-200 text-neutral-500 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-black"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -124,7 +124,7 @@ function ActionButtons({ compact, onPreview, onEdit, onDelete, onApprove, approv
           className={`flex h-8 w-8 items-center justify-center rounded-md border transition ${
             approved
               ? 'cursor-default border-emerald-200 bg-emerald-50 text-emerald-600'
-              : 'border-neutral-200 text-neutral-500 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600'
+              : 'cursor-pointer border-neutral-200 text-neutral-500 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600'
           }`}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,7 +140,7 @@ function ActionButtons({ compact, onPreview, onEdit, onDelete, onApprove, approv
       <button
         onClick={onEdit}
         aria-label="Edit"
-        className="flex h-8 w-8 items-center justify-center rounded-md border border-neutral-200 text-neutral-500 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-black"
+        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-neutral-200 text-neutral-500 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-black"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -155,7 +155,7 @@ function ActionButtons({ compact, onPreview, onEdit, onDelete, onApprove, approv
         onClick={onDelete}
         disabled={deleting}
         aria-label="Delete"
-        className="flex h-8 w-8 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-600 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-600 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -184,7 +184,7 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
                   type="checkbox"
                   checked={allSelected}
                   onChange={() => onToggleAll(items.map((item) => item.id))}
-                  className="h-4 w-4 rounded border-neutral-300 accent-brand-500"
+                  className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500"
                 />
               </th>
               <th className="px-3 py-3.5">POST PREVIEW</th>
@@ -201,16 +201,17 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
               return (
                 <tr
                   key={item.id}
-                  className={`border-b border-neutral-100 last:border-0 transition ${
+                  onClick={() => onPreview(item)}
+                  className={`cursor-pointer border-b border-neutral-100 last:border-0 transition ${
                     checked ? 'bg-brand-50' : 'hover:bg-neutral-50'
                   }`}
                 >
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => onToggle(item.id)}
-                      className="h-4 w-4 rounded border-neutral-300 accent-brand-500"
+                      className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500"
                     />
                   </td>
                   <td className="px-3 py-3.5">
@@ -230,10 +231,7 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
                           item.thumbLabel?.slice(0, 4) || getInitials(item.title)
                         )}
                       </div>
-                      <div>
-                        <p className="font-medium text-black">{item.title}</p>
-                        <p className="text-xs text-neutral-400">ID: {item.id}</p>
-                      </div>
+                      <p className="font-medium text-black">{item.title}</p>
                     </div>
                   </td>
                   <td className="px-3 py-3.5">
@@ -247,7 +245,7 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
                   </td>
                   <td className="px-3 py-3.5 text-neutral-600">{item.language || '—'}</td>
                   <td className="px-3 py-3.5 whitespace-nowrap text-neutral-500">{item.timestamp}</td>
-                  <td className="px-3 py-3.5">
+                  <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
                     <ActionButtons
                       onPreview={() => onPreview(item)}
                       onEdit={() => onEdit(item.id)}
@@ -318,7 +316,7 @@ function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId })
                     onClick={() => onDelete(item.id)}
                     disabled={deletingId === item.id}
                     aria-label="Delete"
-                    className="flex h-6 w-6 items-center justify-center rounded text-neutral-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-neutral-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
@@ -362,7 +360,7 @@ function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId })
               <div className="flex flex-wrap border-t border-neutral-200">
                 <button
                   onClick={() => onPreview(item)}
-                  className="flex min-w-[96px] flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap text-neutral-600 transition hover:bg-neutral-50"
+                  className="flex min-w-[96px] flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap text-neutral-600 transition hover:bg-neutral-50"
                 >
                   <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
@@ -377,7 +375,7 @@ function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId })
                 </button>
                 <button
                   onClick={() => onEdit(item.id)}
-                  className="flex min-w-[96px] flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap text-neutral-600 transition hover:bg-neutral-50"
+                  className="flex min-w-[96px] flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap text-neutral-600 transition hover:bg-neutral-50"
                 >
                   <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
@@ -391,7 +389,7 @@ function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId })
                 </button>
                 <button
                   onClick={() => onApprove(item.id)}
-                  className={`flex min-w-[104px] flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap transition ${
+                  className={`flex min-w-[104px] flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap transition ${
                     approved ? 'bg-emerald-600 text-white' : 'bg-brand-500 text-white hover:bg-brand-600'
                   }`}
                 >

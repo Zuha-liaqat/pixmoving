@@ -1,4 +1,4 @@
-export const platformLabels = { linkedin: 'LinkedIn', instagram: 'Instagram' }
+export const platformLabels = { linkedin: 'LinkedIn', instagram: 'Instagram', twitter: 'Twitter' }
 
 export const fallbackThumbClasses = [
   'bg-gradient-to-br from-violet-200 to-fuchsia-400',

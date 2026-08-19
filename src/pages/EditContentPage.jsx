@@ -331,22 +331,25 @@ export default function EditContentPage() {
           <p className="mb-2 text-xs font-semibold tracking-widest text-neutral-400">
             CHANNELS
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="space-y-2">
             {item.channels.map((name) => {
               const active = channels.includes(name)
               return (
-                <button
+                <label
                   key={name}
-                  onClick={() => toggleChannel(name)}
-                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-                    active
-                      ? 'border-brand-500 bg-brand-500 text-white'
-                      : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'
-                  }`}
+                  className="flex cursor-pointer select-none items-center gap-3 rounded-lg border border-neutral-200 bg-white p-2.5 transition hover:bg-neutral-50"
                 >
-                  {channelMeta[name]}
-                  {name}
-                </button>
+                  <input
+                    type="checkbox"
+                    checked={active}
+                    onChange={() => toggleChannel(name)}
+                    className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500"
+                  />
+                  <span className="flex items-center gap-2.5">
+                    {channelMeta[name]}
+                    <span className="text-sm font-medium text-neutral-700">{name}</span>
+                  </span>
+                </label>
               )
             })}
           </div>

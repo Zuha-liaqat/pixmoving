@@ -142,7 +142,7 @@ export default function CreatePostPage() {
   const [scheduleTime, setScheduleTime] = useState('')
   const [scheduleEndTime, setScheduleEndTime] = useState('')
   const [additionalDetails, setAdditionalDetails] = useState('')
-  const [selectedPlatform, setSelectedPlatform] = useState('LinkedIn')
+  const [selectedPlatform, setSelectedPlatform] = useState(null)
   const [tags, setTags] = useState(['#PIXMoving', '#RoboBus'])
   const [newTag, setNewTag] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -233,7 +233,7 @@ export default function CreatePostPage() {
   }
 
   async function handleGenerate() {
-    if (!prompt.trim()) return
+    if (!prompt.trim() || !selectedPlatform) return
     setIsGenerating(true)
     setGenerateError(null)
 
@@ -277,7 +277,7 @@ export default function CreatePostPage() {
         </p> */}
         <button
           onClick={handleGenerate}
-          disabled={!prompt.trim() || isGenerating}
+          disabled={!prompt.trim() || !selectedPlatform || isGenerating}
           className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -576,8 +576,8 @@ export default function CreatePostPage() {
                   <input
                     type="checkbox"
                     checked={selectedPlatform === platform}
-                    onChange={() => setSelectedPlatform(platform)}
-                    className="h-4 w-4 rounded border-neutral-300 accent-brand-500"
+                    onChange={() => setSelectedPlatform((prev) => (prev === platform ? null : platform))}
+                    className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500"
                   />
                   <span className="flex items-center gap-2.5">
                     {icon}
@@ -595,26 +595,16 @@ export default function CreatePostPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-2xl">
             <div className="flex flex-col items-center">
-              {/* Spinner */}
-              <div className="relative h-16 w-16">
-                <div className="absolute inset-0 rounded-full border-4 border-neutral-200" />
-                <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-brand-500" />
+              <div className="relative flex h-14 w-14 items-center justify-center">
+                <span className="absolute inset-0 animate-ping rounded-full bg-brand-400/40" />
+                <span className="absolute inset-1.5 animate-pulse rounded-full bg-gradient-to-br from-brand-300 to-brand-600 opacity-80 blur-[2px]" />
+                <span className="relative h-5 w-5 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 shadow-lg shadow-brand-500/50" />
               </div>
 
-              <h3 className="mt-6 text-lg font-semibold text-black">Generating your post</h3>
+              <h3 className="animate-shimmer-text mt-5 text-lg font-semibold">Generating your post</h3>
               <p className="mt-2 text-center text-sm text-neutral-500">
                 Our AI is crafting your content based on your prompt. This usually takes a few seconds.
               </p>
-
-              <div className="mt-6 w-full">
-                <div className="flex items-center justify-between text-xs text-neutral-400">
-                  <span>Analyzing prompt...</span>
-                  <span className="animate-pulse">●</span>
-                </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-neutral-200">
-                  <div className="h-full w-2/3 animate-pulse rounded-full bg-brand-500" />
-                </div>
-              </div>
             </div>
           </div>
         </div>
