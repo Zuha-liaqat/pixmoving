@@ -7,12 +7,12 @@ import { mapApiPost } from '../lib/postMapper'
 
 const platformIcons = {
   Twitter: (
-    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="black" aria-label="X">
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="black" aria-label="X">
       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
     </svg>
   ),
   'Web App': (
-    <div className="flex h-6 w-6 items-center justify-center rounded bg-sky-500 text-white">
+    <div className="flex h-5 w-5 items-center justify-center rounded bg-sky-500 text-white">
       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path
           strokeLinecap="round"
@@ -24,7 +24,7 @@ const platformIcons = {
     </div>
   ),
   API: (
-    <div className="flex h-6 w-6 items-center justify-center rounded bg-neutral-700 text-white">
+    <div className="flex h-5 w-5 items-center justify-center rounded bg-neutral-700 text-white">
       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path
           strokeLinecap="round"
@@ -36,7 +36,7 @@ const platformIcons = {
     </div>
   ),
   Instagram: (
-    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Instagram">
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Instagram">
       <defs>
         <linearGradient id="aq-ig" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#FEDA75" />
@@ -52,7 +52,7 @@ const platformIcons = {
     </svg>
   ),
   LinkedIn: (
-    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="#0A66C2" aria-label="LinkedIn">
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#0A66C2" aria-label="LinkedIn">
       <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
     </svg>
   ),
@@ -292,7 +292,7 @@ function getMeta(item) {
   return `${item.caption.trim().split(/\s+/).length} Words`
 }
 
-function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId, approvingIds }) {
+function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId, approvingIds, selectedIds, onToggle }) {
   const approvedCount = items.filter((item) => item.status === 'PRODUCTION').length
 
   return (
@@ -301,35 +301,49 @@ function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId, a
         {items.map((item) => {
           const approved = item.status === 'PRODUCTION'
           const approving = approvingIds.has(item.id)
+          const checked = selectedIds.has(item.id)
           return (
             <div
               key={item.id}
-              className="flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm"
+              className={`flex flex-col overflow-hidden rounded-lg border bg-white shadow-sm transition ${
+                checked ? 'border-brand-400 ring-2 ring-brand-100' : 'border-neutral-200'
+              }`}
             >
-              <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-3 py-2.5">
-                <div className="flex items-center gap-1.5">
-                  {item.platforms.map((p) => (
-                    <span key={p}>{platformIcons[p]}</span>
-                  ))}
-                  <span className="text-sm font-semibold text-black">{item.platforms.join(' + ')} Draft</span>
+              <div className="flex flex-col gap-1.5 border-b border-neutral-200 bg-neutral-50 px-3 py-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    disabled={approved}
+                    onChange={() => onToggle(item.id)}
+                    className="h-4 w-4 shrink-0 cursor-pointer rounded border-neutral-300 accent-brand-500 disabled:cursor-not-allowed disabled:opacity-40"
+                  />
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className="text-xs text-neutral-400">{getMeta(item)}</span>
+                    <button
+                      onClick={() => onDelete(item.id)}
+                      disabled={deletingId === item.id}
+                      aria-label="Delete"
+                      className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-neutral-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.75}
+                          d="M14.74 9l-.346 9m-4.788 0L9.26 9M19.228 5.79c1.121.113 2.235.256 3.34.428m-3.34-.428L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c1.105-.172 2.219-.315 3.34-.428m0 0a48.108 48.108 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-neutral-400">{getMeta(item)}</span>
-                  <button
-                    onClick={() => onDelete(item.id)}
-                    disabled={deletingId === item.id}
-                    aria-label="Delete"
-                    className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-neutral-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.75}
-                        d="M14.74 9l-.346 9m-4.788 0L9.26 9M19.228 5.79c1.121.113 2.235.256 3.34.428m-3.34-.428L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c1.105-.172 2.219-.315 3.34-.428m0 0a48.108 48.108 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                      />
-                    </svg>
-                  </button>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  {item.platforms.map((p) => (
+                    <span key={p} className="flex items-center gap-1.5">
+                      {platformIcons[p]}
+                      <span className="text-sm font-semibold text-black">{p}</span>
+                    </span>
+                  ))}
                 </div>
               </div>
 
@@ -689,6 +703,8 @@ export default function ApprovalQueuePage() {
             onDelete={handleDelete}
             deletingId={deletingId}
             approvingIds={approvingIds}
+            selectedIds={selectedIds}
+            onToggle={handleToggle}
           />
         )
       )}
