@@ -231,7 +231,9 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
                           item.thumbLabel?.slice(0, 4) || getInitials(item.title)
                         )}
                       </div>
-                      <p className="font-medium text-black">{item.title}</p>
+                      <div>
+                        <p className="font-medium text-black">{item.title}</p>
+                      </div>
                     </div>
                   </td>
                   <td className="px-3 py-3.5">
@@ -247,7 +249,6 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
                   <td className="px-3 py-3.5 whitespace-nowrap text-neutral-500">{item.timestamp}</td>
                   <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
                     <ActionButtons
-                      onPreview={() => onPreview(item)}
                       onEdit={() => onEdit(item.id)}
                       onDelete={() => onDelete(item.id)}
                       onApprove={() => onApprove(item.id)}

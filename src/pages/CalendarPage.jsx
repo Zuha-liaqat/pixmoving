@@ -431,7 +431,7 @@ function MonthView({ grid, monthDate, today, eventsByDate, selected, onSelect, o
             <div
               key={date.toISOString()}
               onClick={() => onDayClick(date)}
-              className={`flex min-h-[7rem] cursor-pointer flex-col border-b border-r border-neutral-100 p-1.5 transition hover:bg-neutral-50/70 ${
+              className={`flex min-h-[7rem] flex-col border-b border-r border-neutral-100 p-1.5 transition hover:bg-neutral-50/70 ${
                 inMonth ? 'bg-white' : 'bg-neutral-50/60'
               }`}
             >
@@ -459,7 +459,7 @@ function MonthView({ grid, monthDate, today, eventsByDate, selected, onSelect, o
                         e.stopPropagation()
                         onSelect(ev)
                       }}
-                      className={`flex w-full flex-col gap-0.5 text-left font-medium text-white transition hover:opacity-90 ${
+                      className={`flex w-full cursor-pointer flex-col gap-0.5 text-left font-medium text-white transition hover:opacity-90 ${
                         single
                           ? 'rounded pl-1 pr-1.5 py-2 text-[11px]'
                           : 'rounded pl-0.5 pr-1 py-0.5 text-[10px]'
