@@ -46,3 +46,18 @@ body {
   color: transparent;
   animation: shimmer-text 2.2s linear infinite;
 }
+
+@keyframes claude-dot {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-claude-dot {
+  animation: claude-dot 1.2s ease-in-out infinite;
+}
