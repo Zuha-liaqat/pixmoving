@@ -2,17 +2,11 @@ import { useMemo, useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarDays, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
-import { calendarEvents } from '../data/calendarEvents'
-import { getQueueItemById, getGeneratedPosts } from '../data/posts'
+import { getQueueItemById } from '../data/posts'
+import { fetchCalendarPosts } from '../lib/api'
+import { mapApiPost } from '../lib/postMapper'
 
 const WEEKDAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
-
-const typeBadgeColor = {
-  REEL: 'bg-fuchsia-100 text-fuchsia-700',
-  MOTION: 'bg-brand-100 text-brand-700',
-  INTERIOR: 'bg-neutral-800 text-white',
-  API: 'bg-emerald-100 text-emerald-700',
-}
 
 const tagColors = [
   'bg-brand-100 text-brand-800',
@@ -105,6 +99,17 @@ function isSameDay(a, b) {
   )
 }
 
+function parseApiDate(dateStr) {
+  if (!dateStr) return null
+  const parts = dateStr.split('-').map(Number)
+  if (parts.length !== 3 || parts.some(Number.isNaN)) return null
+  // API sends DD-MM-YYYY; fall back to YYYY-MM-DD if the first segment is the year.
+  const [a, b, c] = parts
+  const [year, month, day] = a > 31 ? [a, b, c] : [c, b, a]
+  const d = new Date(year, month - 1, day)
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
 function addDays(date, n) {
   const d = new Date(date)
   d.setDate(d.getDate() + n)
@@ -131,6 +136,25 @@ function formatTime24(t) {
   const ampm = h >= 12 ? 'PM' : 'AM'
   const hour12 = h % 12 === 0 ? 12 : h % 12
   return `${hour12}:${String(m).padStart(2, '0')} ${ampm}`
+}
+
+function normalizeTimeLabel(raw) {
+  if (!raw) return '09:00 AM'
+  const trimmed = raw.trim()
+  if (/^\d{1,2}:\d{2}\s*(AM|PM)$/i.test(trimmed)) {
+    return trimmed.toUpperCase().replace(/\s+/, ' ')
+  }
+  if (/^\d{1,2}:\d{2}$/.test(trimmed)) {
+    return formatTime24(trimmed)
+  }
+  return trimmed
+}
+
+function truncateTitle(title, wordLimit = 2) {
+  if (!title) return ''
+  const words = title.trim().split(/\s+/)
+  if (words.length <= wordLimit) return title
+  return `${words.slice(0, wordLimit).join(' ')}...`
 }
 
 function ScheduleModal({ date, onClose, onSave }) {
@@ -377,7 +401,7 @@ function TimeGrid({ days, eventsByDate, today, selected, onSelect, multiDay = fa
                        } ${ev.bannerColor ?? pickEventColor(ev.id)}`}
                       style={{ top, height: Math.min(height, (END_HOUR - startHour) * HOUR_HEIGHT) }}
                     >
-                      <span className="truncate text-[11px] font-semibold leading-tight">{ev.title}</span>
+                      <span className="truncate text-[11px] font-semibold leading-tight">{truncateTitle(ev.title)}</span>
                       <span className="truncate text-[9px] opacity-90">{ev.time}</span>
                     </button>
                   )
@@ -469,7 +493,7 @@ function MonthView({ grid, monthDate, today, eventsByDate, selected, onSelect, o
                     >
                       <span className="flex items-center gap-1">
                         <EventPlatformBadges event={ev} />
-                        <span className={`whitespace-normal leading-snug ${single ? 'line-clamp-2' : 'line-clamp-1'}`}>{ev.title}</span>
+                        <span className={`whitespace-normal leading-snug ${single ? 'line-clamp-2' : 'line-clamp-1'}`}>{truncateTitle(ev.title)}</span>
                       </span>
                       <span className={single ? 'text-[9px] opacity-80 ml-4' : 'text-[8px] opacity-80 ml-3'}>{ev.time}</span>
                     </button>
@@ -493,29 +517,40 @@ export default function CalendarPage() {
   const [view, setView] = useState('month')
   const [anchor, setAnchor] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
   const [extraEvents, setExtraEvents] = useState([])
+  const [approvedPosts, setApprovedPosts] = useState([])
+  const [calendarError, setCalendarError] = useState(null)
+
+  useEffect(() => {
+    fetchCalendarPosts()
+      .then((data) => {
+        const posts = Array.isArray(data?.posts) ? data.posts : Array.isArray(data) ? data : []
+        setApprovedPosts(posts.map(mapApiPost))
+      })
+      .catch((err) => setCalendarError(err.message))
+  }, [])
 
   const eventsByDate = useMemo(() => {
-    const generatedPosts = getGeneratedPosts()
-      .filter((p) => p.scheduleDate)
+    const scheduledPosts = approvedPosts
+      .map((p) => ({ ...p, parsedDate: parseApiDate(p.date) }))
+      .filter((p) => p.parsedDate)
       .map((p) => {
-        const d = new Date(p.scheduleDate + 'T00:00:00')
-        const diffMs = d.getTime() - today.getTime()
+        const diffMs = p.parsedDate.getTime() - today.getTime()
         const dayOffset = Math.round(diffMs / (1000 * 60 * 60 * 24))
-        const platform = p.platform || p.channels?.[0] || 'LinkedIn'
         return {
           id: p.id,
           relatedId: p.id,
           dayOffset,
           type: 'MOTION',
           title: p.title,
-          time: p.scheduleTime ? formatTime24(p.scheduleTime) : '09:00 AM',
-          endTime: p.scheduleEndTime ? formatTime24(p.scheduleEndTime) : '09:30 AM',
+          time: p.startTime ? normalizeTimeLabel(p.startTime) : null,
+          endTime: p.endTime ? normalizeTimeLabel(p.endTime) : null,
           thumbClass: p.thumbClass || 'bg-gradient-to-br from-brand-200 to-brand-400',
           description: p.caption,
           hashtags: p.hashtags || [],
           expectedReach: '—',
           reachDelta: '',
-          bestPlatform: platform,
+          bestPlatform: p.platform,
+          platforms: p.platforms,
           matchScore: p.score || 85,
           sentimentLabel: 'OPTIMISTIC',
           audienceLabel: 'Scheduled',
@@ -524,11 +559,11 @@ export default function CalendarPage() {
           bannerColor: pickEventColor(p.id),
         }
       })
-    return [...calendarEvents, ...extraEvents, ...generatedPosts].map((ev) => ({
+    return [...extraEvents, ...scheduledPosts].map((ev) => ({
       ...ev,
       date: addDays(today, ev.dayOffset ?? 0),
     }))
-  }, [today, extraEvents])
+  }, [today, extraEvents, approvedPosts])
 
   const todaysEvent = eventsByDate.find((ev) => isSameDay(ev.date, today))
   const [selected, setSelected] = useState(todaysEvent ?? null)
@@ -631,6 +666,11 @@ export default function CalendarPage() {
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       <div className="flex-1 space-y-4">
+        {calendarError && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+            Couldn't load approved posts for the calendar: {calendarError}
+          </div>
+        )}
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -731,20 +771,13 @@ export default function CalendarPage() {
               <img
                 src={selectedWithImages.images[0].dataUri}
                 alt={selectedWithImages.images[0].name}
-                className="h-full w-full object-contain"
+                className="h-full w-full object-cover"
               />
             ) : (
               <span className="select-none text-5xl font-bold text-white/70">
                 {selectedWithImages.title?.charAt(0).toUpperCase()}
               </span>
             )}
-            <span
-              className={`absolute left-2 top-2 rounded px-2 py-0.5 text-[10px] font-semibold tracking-wide ${
-                typeBadgeColor[selectedWithImages.type] ?? 'bg-brand-500 text-white'
-              }`}
-            >
-              {selectedWithImages.type}
-            </span>
           </div>
 
           <div>
@@ -752,7 +785,10 @@ export default function CalendarPage() {
             <p className="mt-2.5 flex items-start gap-1.5 text-[11px] text-neutral-400">
               <CalendarDays className="mt-px h-3 w-3 shrink-0" />
               <span className="leading-relaxed">
-                {selectedWithImages.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}, {selectedWithImages.time} – {selectedWithImages.endTime}
+                {selectedWithImages.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                {selectedWithImages.time && selectedWithImages.endTime
+                  ? `, ${selectedWithImages.time} – ${selectedWithImages.endTime}`
+                  : ''}
               </span>
             </p>
             <p className="mt-2.5 line-clamp-3 text-xs leading-relaxed text-neutral-500">{selectedWithImages.description}</p>

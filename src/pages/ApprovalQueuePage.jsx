@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { addNotification } from '../data/notifications'
 import PostPreviewModal from '../components/PostPreviewModal'
-import { deleteGeneratedPost, fetchGeneratedPosts } from '../lib/api'
+import { approveGeneratedPosts, deleteGeneratedPost, fetchGeneratedPosts } from '../lib/api'
 import { mapApiPost } from '../lib/postMapper'
 
 const platformIcons = {
@@ -98,43 +98,35 @@ function StatusPill({ status }) {
   )
 }
 
-function ActionButtons({ compact, onPreview, onEdit, onDelete, onApprove, approved, deleting }) {
+function ActionButtons({ compact, onEdit, onDelete, onApprove, approved, approving, deleting }) {
   return (
     <div className={`flex items-center gap-2 ${compact ? '' : 'justify-end'}`}>
-      <button
-        onClick={onPreview}
-        aria-label="Preview"
-        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-neutral-200 text-neutral-500 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-black"
-      >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.75}
-            d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-          />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      </button>
       {onApprove && (
         <button
           onClick={onApprove}
-          disabled={approved}
+          disabled={approved || approving}
           aria-label={approved ? 'Approved' : 'Approve'}
-          className={`flex h-8 w-8 items-center justify-center rounded-md border transition ${
+          className={`flex h-8 w-8 items-center justify-center rounded-md border transition disabled:cursor-not-allowed ${
             approved
-              ? 'cursor-default border-emerald-200 bg-emerald-50 text-emerald-600'
-              : 'cursor-pointer border-neutral-200 text-neutral-500 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600'
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-600'
+              : 'cursor-pointer border-neutral-200 text-neutral-500 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-50'
           }`}
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.75}
-              d="M4.5 12.75l6 6 9-13.5"
-            />
-          </svg>
+          {approving ? (
+            <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            </svg>
+          ) : (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.75}
+                d="M4.5 12.75l6 6 9-13.5"
+              />
+            </svg>
+          )}
         </button>
       )}
       <button
@@ -170,8 +162,9 @@ function ActionButtons({ compact, onPreview, onEdit, onDelete, onApprove, approv
   )
 }
 
-function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, onToggle, onToggleAll, deletingId }) {
-  const allSelected = items.length > 0 && items.every((item) => selectedIds.has(item.id))
+function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, onToggle, onToggleAll, deletingId, approvingIds }) {
+  const selectableIds = items.filter((item) => item.status !== 'PRODUCTION').map((item) => item.id)
+  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id))
 
   return (
     <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
@@ -183,8 +176,9 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
                 <input
                   type="checkbox"
                   checked={allSelected}
-                  onChange={() => onToggleAll(items.map((item) => item.id))}
-                  className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500"
+                  disabled={selectableIds.length === 0}
+                  onChange={() => onToggleAll(selectableIds)}
+                  className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500 disabled:cursor-not-allowed disabled:opacity-40"
                 />
               </th>
               <th className="px-3 py-3.5">POST PREVIEW</th>
@@ -196,69 +190,74 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => {
-              const checked = selectedIds.has(item.id)
-              return (
-                <tr
-                  key={item.id}
-                  onClick={() => onPreview(item)}
-                  className={`cursor-pointer border-b border-neutral-100 last:border-0 transition ${
-                    checked ? 'bg-brand-50' : 'hover:bg-neutral-50'
-                  }`}
-                >
-                  <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => onToggle(item.id)}
-                      className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500"
-                    />
-                  </td>
-                  <td className="px-3 py-3.5">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white text-[10px] font-bold text-white/90 shadow-sm ${
-                          item.images && item.images.length > 0 ? '' : item.thumbClass
-                        }`}
-                      >
-                        {item.images && item.images.length > 0 ? (
-                          <img
-                            src={item.images[0].dataUri}
-                            alt={item.images[0].name}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          item.thumbLabel?.slice(0, 4) || getInitials(item.title)
-                        )}
+            {items.flatMap((item) =>
+              item.platforms.map((platform) => {
+                const checked = selectedIds.has(item.id)
+                const approved = item.status === 'PRODUCTION'
+                return (
+                  <tr
+                    key={`${item.id}-${platform}`}
+                    onClick={() => onPreview(item)}
+                    className={`cursor-pointer border-b border-neutral-100 last:border-0 transition ${
+                      checked ? 'bg-brand-50' : 'hover:bg-neutral-50'
+                    }`}
+                  >
+                    <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={approved}
+                        onChange={() => onToggle(item.id)}
+                        className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500 disabled:cursor-not-allowed disabled:opacity-40"
+                      />
+                    </td>
+                    <td className="px-3 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white text-[10px] font-bold text-white/90 shadow-sm ${
+                            item.images && item.images.length > 0 ? '' : item.thumbClass
+                          }`}
+                        >
+                          {item.images && item.images.length > 0 ? (
+                            <img
+                              src={item.images[0].dataUri}
+                              alt={item.images[0].name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            item.thumbLabel?.slice(0, 4) || getInitials(item.title)
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-black">{item.title}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-black">{item.title}</p>
+                    </td>
+                    <td className="px-3 py-3.5">
+                      <div className="flex items-center gap-1.5">
+                        {platformIcons[platform]}
+                        <span className="text-neutral-600">{platform}</span>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-3 py-3.5">
-                    <div className="flex items-center gap-2">
-                      {platformIcons[item.platform]}
-                      <span className="text-neutral-600">{item.platform}</span>
-                    </div>
-                  </td>
-                  <td className="px-3 py-3.5">
-                    <ScoreBar score={item.score} />
-                  </td>
-                  <td className="px-3 py-3.5 text-neutral-600">{item.language || '—'}</td>
-                  <td className="px-3 py-3.5 whitespace-nowrap text-neutral-500">{item.timestamp}</td>
-                  <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
-                    <ActionButtons
-                      onEdit={() => onEdit(item.id)}
-                      onDelete={() => onDelete(item.id)}
-                      onApprove={() => onApprove(item.id)}
-                      approved={item.status === 'PRODUCTION'}
-                      deleting={deletingId === item.id}
-                    />
-                  </td>
-                </tr>
-              )
-            })}
+                    </td>
+                    <td className="px-3 py-3.5">
+                      <ScoreBar score={item.score} />
+                    </td>
+                    <td className="px-3 py-3.5 text-neutral-600">{item.language || '—'}</td>
+                    <td className="px-3 py-3.5 whitespace-nowrap text-neutral-500">{item.timestamp}</td>
+                    <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
+                      <ActionButtons
+                        onEdit={() => onEdit(item.id)}
+                        onDelete={() => onDelete(item.id)}
+                        onApprove={() => onApprove(item.id)}
+                        approved={approved}
+                        approving={approvingIds.has(item.id)}
+                        deleting={deletingId === item.id}
+                      />
+                    </td>
+                  </tr>
+                )
+              }),
+            )}
           </tbody>
         </table>
       </div>
@@ -293,7 +292,7 @@ function getMeta(item) {
   return `${item.caption.trim().split(/\s+/).length} Words`
 }
 
-function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId }) {
+function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId, approvingIds }) {
   const approvedCount = items.filter((item) => item.status === 'PRODUCTION').length
 
   return (
@@ -301,15 +300,18 @@ function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId })
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {items.map((item) => {
           const approved = item.status === 'PRODUCTION'
+          const approving = approvingIds.has(item.id)
           return (
             <div
               key={item.id}
               className="flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm"
             >
               <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-3 py-2.5">
-                <div className="flex items-center gap-2">
-                  {platformIcons[item.platform]}
-                  <span className="text-sm font-semibold text-black">{item.platform} Draft</span>
+                <div className="flex items-center gap-1.5">
+                  {item.platforms.map((p) => (
+                    <span key={p}>{platformIcons[p]}</span>
+                  ))}
+                  <span className="text-sm font-semibold text-black">{item.platforms.join(' + ')} Draft</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-neutral-400">{getMeta(item)}</span>
@@ -390,18 +392,26 @@ function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId })
                 </button>
                 <button
                   onClick={() => onApprove(item.id)}
-                  className={`flex min-w-[104px] flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap transition ${
-                    approved ? 'bg-emerald-600 text-white' : 'bg-brand-500 text-white hover:bg-brand-600'
+                  disabled={approved || approving}
+                  className={`flex min-w-[104px] flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap transition disabled:cursor-not-allowed ${
+                    approved ? 'bg-emerald-600 text-white' : 'cursor-pointer bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-60'
                   }`}
                 >
-                  <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12.75l2.25 2.25 4.5-6.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  {approving ? (
+                    <svg className="h-4 w-4 shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+                  ) : (
+                    <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12.75l2.25 2.25 4.5-6.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  )}
                   {approved ? 'Approved' : 'Approve'}
                 </button>
               </div>
@@ -451,6 +461,7 @@ export default function ApprovalQueuePage() {
   const [selectedIds, setSelectedIds] = useState(new Set())
   const [previewItem, setPreviewItem] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
+  const [approvingIds, setApprovingIds] = useState(new Set())
 
   const loadItems = useCallback(() => {
     setStatus((prev) => (prev === 'ready' ? 'ready' : 'loading'))
@@ -514,40 +525,62 @@ export default function ApprovalQueuePage() {
     })
   }
 
-  function handleBatchApprove() {
-    const count = selectedIds.size
-    setItems((prev) => {
-      const approved = prev.filter((i) => selectedIds.has(i.id))
-      if (approved.length > 0) {
-        addNotification({
-          type: 'approval',
-          title: `${count} post${count > 1 ? 's' : ''} approved`,
-          description: `${count} post${count > 1 ? 's have' : ' has'} been approved and queued for publishing.`,
-          platform: 'Multi-platform',
-          author: 'Alex Martinez',
-        })
-      }
-      return prev.map((item) =>
-        selectedIds.has(item.id) ? { ...item, status: 'PRODUCTION' } : item,
+  async function handleBatchApprove() {
+    const ids = [...selectedIds]
+    const count = ids.length
+    if (count === 0) return
+
+    setApprovingIds((prev) => new Set([...prev, ...ids]))
+    try {
+      await approveGeneratedPosts(ids)
+      setItems((prev) =>
+        prev.map((item) => (ids.includes(item.id) ? { ...item, status: 'PRODUCTION' } : item)),
       )
-    })
-    setSelectedIds(new Set())
+      addNotification({
+        type: 'approval',
+        title: `${count} post${count > 1 ? 's' : ''} approved`,
+        description: `${count} post${count > 1 ? 's have' : ' has'} been approved and queued for publishing.`,
+        platform: 'Multi-platform',
+        author: 'Alex Martinez',
+      })
+      setSelectedIds(new Set())
+    } catch (err) {
+      window.alert(err.message)
+    } finally {
+      setApprovingIds((prev) => {
+        const next = new Set(prev)
+        ids.forEach((id) => next.delete(id))
+        return next
+      })
+    }
   }
 
-  function handleApprove(id) {
-    setItems((prev) => {
-      const item = prev.find((i) => i.id === id)
-      if (item) {
-        addNotification({
-          type: 'approval',
-          title: `"${item.title}" approved`,
-          description: `Your ${item.platform} post has been approved and moved to production.`,
-          platform: item.platform,
-          author: 'Alex Martinez',
-        })
-      }
-      return prev.map((i) => (i.id === id ? { ...i, status: 'PRODUCTION' } : i))
-    })
+  async function handleApprove(id) {
+    setApprovingIds((prev) => new Set(prev).add(id))
+    try {
+      await approveGeneratedPosts([id])
+      setItems((prev) => {
+        const item = prev.find((i) => i.id === id)
+        if (item) {
+          addNotification({
+            type: 'approval',
+            title: `"${item.title}" approved`,
+            description: `Your ${item.platform} post has been approved and moved to production.`,
+            platform: item.platform,
+            author: 'Alex Martinez',
+          })
+        }
+        return prev.map((i) => (i.id === id ? { ...i, status: 'PRODUCTION' } : i))
+      })
+    } catch (err) {
+      window.alert(err.message)
+    } finally {
+      setApprovingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+    }
   }
 
   return (
@@ -599,13 +632,13 @@ export default function ApprovalQueuePage() {
          
           <button
             onClick={handleBatchApprove}
-            disabled={selectedIds.size === 0}
-            className="flex items-center gap-1.5 rounded-md bg-brand-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={selectedIds.size === 0 || approvingIds.size > 0}
+            className="flex cursor-pointer items-center gap-1.5 rounded-md bg-brand-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
             </svg>
-            Batch Approve{selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}
+            {approvingIds.size > 0 ? 'Approving…' : `Batch Approve${selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}`}
           </button>
         </div>
       </div>
@@ -645,6 +678,7 @@ export default function ApprovalQueuePage() {
             onToggle={handleToggle}
             onToggleAll={handleToggleAll}
             deletingId={deletingId}
+            approvingIds={approvingIds}
           />
         ) : (
           <GridView
@@ -654,6 +688,7 @@ export default function ApprovalQueuePage() {
             onApprove={handleApprove}
             onDelete={handleDelete}
             deletingId={deletingId}
+            approvingIds={approvingIds}
           />
         )
       )}

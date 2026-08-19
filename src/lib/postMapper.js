@@ -18,7 +18,12 @@ export function formatTimestamp(isoString) {
 }
 
 export function mapApiPost(raw, index = 0) {
-  const platform = platformLabels[raw.platform] ?? raw.platform ?? 'LinkedIn'
+  const platforms = String(raw.platform ?? '')
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => platformLabels[p] ?? p)
+  const platform = platforms[0] ?? 'LinkedIn'
   const hashtags =
     typeof raw.hashtags === 'string'
       ? raw.hashtags.split(/\s+/).filter(Boolean)
@@ -26,6 +31,7 @@ export function mapApiPost(raw, index = 0) {
         ? raw.hashtags
         : []
   const score = raw.ai_safety_score ?? 0
+  const status = raw.is_approved ? 'PRODUCTION' : score < 60 ? 'FLAGGED' : 'STAGING'
 
   return {
     id: raw.id,
@@ -33,9 +39,11 @@ export function mapApiPost(raw, index = 0) {
     headline: raw.headline,
     subtitle: raw.subtitle,
     platform,
+    platforms: platforms.length ? platforms : [platform],
     thumbClass: fallbackThumbClasses[index % fallbackThumbClasses.length],
     score,
-    status: score < 60 ? 'FLAGGED' : 'STAGING',
+    status,
+    isApproved: Boolean(raw.is_approved),
     timestamp: formatTimestamp(raw.created_at),
     language: raw.language ?? '',
     tone: raw.tone ?? '',
@@ -44,7 +52,7 @@ export function mapApiPost(raw, index = 0) {
     endTime: raw.end_time ?? '',
     caption: raw.caption ?? '',
     hashtags,
-    channels: [platform],
+    channels: platforms.length ? platforms : [platform],
     images: raw.image_url ? [{ name: raw.title || 'image', dataUri: raw.image_url }] : [],
   }
 }

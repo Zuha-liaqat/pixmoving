@@ -766,7 +766,8 @@ const platforms = [
 ]
 
 export default function PostPreviewModal({ item, onClose }) {
-  const defaultTab = platforms.some((p) => p.key === item.platform) ? item.platform : 'LinkedIn'
+  const itemPlatforms = item.platforms ?? [item.platform]
+  const defaultTab = itemPlatforms.find((pl) => platforms.some((p) => p.key === pl)) ?? 'LinkedIn'
   const [tab, setTab] = useState(defaultTab)
   const [device, setDevice] = useState('mobile')
   const initials = getInitials(item.title)
@@ -789,7 +790,7 @@ export default function PostPreviewModal({ item, onClose }) {
 
         <div className="mb-3 flex items-center gap-2 rounded-lg bg-neutral-100 p-1.5">
           {platforms.map((p) => {
-            const enabled = p.key === item.platform
+            const enabled = itemPlatforms.includes(p.key)
             return (
               <button
                 key={p.key}

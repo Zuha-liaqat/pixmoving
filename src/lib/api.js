@@ -146,6 +146,42 @@ export async function updateGeneratedPost(postId, updates) {
   return res.json()
 }
 
+export async function approveGeneratedPosts(postIds, isApproved = true) {
+  const res = await fetch(
+    `${API_BASE_URL}/generate-post/approve?is_approved=${isApproved}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(postIds),
+    },
+  )
+
+  if (!res.ok) {
+    throw new Error(
+      await extractErrorMessage(res, `Failed to approve posts (${res.status})`),
+    )
+  }
+
+  return res.json()
+}
+
+export async function fetchCalendarPosts({ platform, isPosted } = {}) {
+  const params = new URLSearchParams()
+  if (platform) params.set('platform', platform)
+  if (isPosted !== undefined && isPosted !== null) params.set('is_posted', isPosted)
+  const query = params.toString()
+
+  const res = await fetch(`${API_BASE_URL}/calendar${query ? `?${query}` : ''}`, {
+    headers: { accept: 'application/json' },
+  })
+
+  if (!res.ok) {
+    throw new Error(`Failed to load calendar posts (${res.status})`)
+  }
+
+  return res.json()
+}
+
 export async function deleteGeneratedPost(postId) {
   const res = await fetch(`${API_BASE_URL}/generate-post/${postId}`, {
     method: 'DELETE',
