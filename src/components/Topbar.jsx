@@ -9,6 +9,7 @@ const pageTitles = [
   { match: '/library', label: 'Library' },
   { match: '/approval-queue', label: 'Approval Queue' },
   { match: '/calendar', label: 'Calendar' },
+  { match: '/integrations', label: 'Integrations' },
   { match: '/notifications', label: 'Notifications' },
   { match: '/settings', label: 'Settings' },
 ]

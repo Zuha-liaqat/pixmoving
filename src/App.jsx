@@ -8,6 +8,7 @@ import EditContentPage from './pages/EditContentPage'
 import CalendarPage from './pages/CalendarPage'
 import NotificationsPage from './pages/NotificationsPage'
 import PlaceholderPage from './pages/PlaceholderPage'
+import IntegrationsPage from './pages/IntegrationsPage'
 import DashboardLayout from './layouts/DashboardLayout'
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/approval-queue/:id/edit" element={<EditContentPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/integrations" element={<IntegrationsPage />} />
           <Route
             path="/settings"
             element={<PlaceholderPage title="Settings" />}
