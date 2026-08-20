@@ -595,16 +595,26 @@ export default function CreatePostPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-2xl">
             <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-neutral-800 animate-claude-dot" style={{ animationDelay: '0s' }} />
-                <span className="h-2 w-2 rounded-full bg-neutral-800 animate-claude-dot" style={{ animationDelay: '0.15s' }} />
-                <span className="h-2 w-2 rounded-full bg-neutral-800 animate-claude-dot" style={{ animationDelay: '0.3s' }} />
+              <div className="relative flex h-16 w-16 items-center justify-center">
+                <span className="absolute inset-0 animate-ping rounded-full bg-brand-400/30" />
+                <span className="absolute inset-1 animate-pulse rounded-full bg-gradient-to-br from-brand-300 via-brand-500 to-fuchsia-400 opacity-80 blur-[3px]" />
+                <span className="relative flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 shadow-lg shadow-brand-500/50">
+                  <span className="flex items-center gap-0.5">
+                    <span className="h-1 w-1 rounded-full bg-white animate-claude-dot" style={{ animationDelay: '0s' }} />
+                    <span className="h-1 w-1 rounded-full bg-white animate-claude-dot" style={{ animationDelay: '0.15s' }} />
+                    <span className="h-1 w-1 rounded-full bg-white animate-claude-dot" style={{ animationDelay: '0.3s' }} />
+                  </span>
+                </span>
               </div>
 
-              <h3 className="mt-5 text-lg font-semibold text-black">Generating your post</h3>
+              <h3 className="animate-shimmer-text mt-5 text-lg font-semibold">Generating your post</h3>
               <p className="mt-2 text-center text-sm text-neutral-500">
                 Our AI is crafting your content based on your prompt. This usually takes a few seconds.
               </p>
+
+              <div className="mt-6 w-full overflow-hidden rounded-full bg-neutral-200">
+                <div className="h-1.5 w-1/3 rounded-full bg-gradient-to-r from-brand-400 via-brand-500 to-fuchsia-400 animate-progress-indeterminate" />
+              </div>
             </div>
           </div>
         </div>
