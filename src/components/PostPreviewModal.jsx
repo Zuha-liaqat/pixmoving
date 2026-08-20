@@ -765,7 +765,7 @@ const platforms = [
   },
 ]
 
-export default function PostPreviewModal({ item, onClose }) {
+export default function PostPreviewModal({ item, onClose, onPublish, published, publishing }) {
   const itemPlatforms = item.platforms ?? [item.platform]
   const defaultTab = itemPlatforms.find((pl) => platforms.some((p) => p.key === pl)) ?? 'LinkedIn'
   const [tab, setTab] = useState(defaultTab)
@@ -856,6 +856,35 @@ export default function PostPreviewModal({ item, onClose }) {
           <BrowserFrame url={active.url}>
             <active.Web item={item} initials={initials} />
           </BrowserFrame>
+        )}
+
+        {onPublish && (
+          <div className="mt-4 flex items-center justify-between gap-3 border-t border-neutral-100 pt-4">
+            <p className="text-xs text-neutral-400">
+              {published
+                ? 'This post has already been published.'
+                : 'Skip review and publish this post to the target platform(s) right away.'}
+            </p>
+            <button
+              onClick={onPublish}
+              disabled={published || publishing}
+              className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm transition disabled:cursor-not-allowed ${
+                published ? 'bg-emerald-600' : 'bg-brand-500 hover:bg-brand-600 disabled:opacity-60'
+              }`}
+            >
+              {publishing ? (
+                <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+              ) : (
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              )}
+              {published ? 'Posted' : publishing ? 'Posting…' : 'Post Now'}
+            </button>
+          </div>
         )}
       </div>
     </div>

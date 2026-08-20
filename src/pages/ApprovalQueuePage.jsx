@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { addNotification } from '../data/notifications'
 import PostPreviewModal from '../components/PostPreviewModal'
-import { approveGeneratedPosts, deleteGeneratedPost, fetchGeneratedPosts } from '../lib/api'
+import { approveGeneratedPosts, deleteGeneratedPost, fetchGeneratedPosts, publishGeneratedPost } from '../lib/api'
 import { mapApiPost } from '../lib/postMapper'
 
 const platformIcons = {
@@ -98,9 +98,26 @@ function StatusPill({ status }) {
   )
 }
 
-function ActionButtons({ compact, onEdit, onDelete, onApprove, approved, approving, deleting }) {
+function ActionButtons({ compact, onPreview, onEdit, onDelete, onApprove, approved, approving, deleting }) {
   return (
     <div className={`flex items-center gap-2 ${compact ? '' : 'justify-end'}`}>
+      {onPreview && (
+        <button
+          onClick={onPreview}
+          aria-label="Preview"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-neutral-200 text-neutral-500 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-black"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.75}
+              d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+      )}
       {onApprove && (
         <button
           onClick={onApprove}
@@ -246,6 +263,7 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
                     <td className="px-3 py-3.5 whitespace-nowrap text-neutral-500">{item.timestamp}</td>
                     <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
                       <ActionButtons
+                        onPreview={() => onPreview(item)}
                         onEdit={() => onEdit(item.id)}
                         onDelete={() => onDelete(item.id)}
                         onApprove={() => onApprove(item.id)}
@@ -476,6 +494,8 @@ export default function ApprovalQueuePage() {
   const [previewItem, setPreviewItem] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
   const [approvingIds, setApprovingIds] = useState(new Set())
+  const [publishingIds, setPublishingIds] = useState(new Set())
+  const publishedDuringPreview = useRef(false)
 
   const loadItems = useCallback(() => {
     setStatus((prev) => (prev === 'ready' ? 'ready' : 'loading'))
@@ -590,6 +610,35 @@ export default function ApprovalQueuePage() {
       window.alert(err.message)
     } finally {
       setApprovingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+    }
+  }
+
+  async function handlePublish(id) {
+    setPublishingIds((prev) => new Set(prev).add(id))
+    try {
+      await publishGeneratedPost(id)
+      publishedDuringPreview.current = true
+      setItems((prev) => {
+        const item = prev.find((i) => i.id === id)
+        if (item) {
+          addNotification({
+            type: 'approval',
+            title: `"${item.title}" published`,
+            description: `Your ${item.platform} post was published directly, without going through review.`,
+            platform: item.platform,
+            author: 'Alex Martinez',
+          })
+        }
+        return prev.map((i) => (i.id === id ? { ...i, isPosted: true } : i))
+      })
+    } catch (err) {
+      window.alert(err.message)
+    } finally {
+      setPublishingIds((prev) => {
         const next = new Set(prev)
         next.delete(id)
         return next
@@ -734,7 +783,19 @@ export default function ApprovalQueuePage() {
       )}
 
       {previewItem && (
-        <PostPreviewModal item={previewItem} onClose={() => setPreviewItem(null)} />
+        <PostPreviewModal
+          item={items.find((i) => i.id === previewItem.id) ?? previewItem}
+          onClose={() => {
+            setPreviewItem(null)
+            if (publishedDuringPreview.current) {
+              publishedDuringPreview.current = false
+              loadItems()
+            }
+          }}
+          onPublish={() => handlePublish(previewItem.id)}
+          published={(items.find((i) => i.id === previewItem.id) ?? previewItem).isPosted}
+          publishing={publishingIds.has(previewItem.id)}
+        />
       )}
     </div>
   )

@@ -111,13 +111,16 @@ const sectionChips = {
   target: 'bg-pink-100 text-pink-600',
 }
 
-function SectionLabel({ icon, chip, title }) {
+function SectionLabel({ icon, chip, title, required }) {
   return (
     <div className="mb-4 flex items-center gap-2.5">
       <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${chip}`}>
         {icon}
       </span>
-      <h3 className="text-sm font-bold tracking-wide text-neutral-800">{title}</h3>
+      <h3 className="text-sm font-bold tracking-wide text-neutral-800">
+        {title}
+        {required && <span className="text-red-500"> *</span>}
+      </h3>
     </div>
   )
 }
@@ -135,7 +138,6 @@ export default function CreatePostPage() {
   const [referenceUrl, setReferenceUrl] = useState('')
   const [scheduleDate, setScheduleDate] = useState('')
   const [scheduleTime, setScheduleTime] = useState('')
-  const [scheduleEndTime, setScheduleEndTime] = useState('')
   const [additionalDetails, setAdditionalDetails] = useState('')
   const [selectedPlatforms, setSelectedPlatforms] = useState([])
   const [tags, setTags] = useState(['#PIXMoving', '#RoboBus'])
@@ -228,7 +230,7 @@ export default function CreatePostPage() {
   }
 
   async function handleGenerate() {
-    if (!prompt.trim() || selectedPlatforms.length === 0) return
+    if (!prompt.trim() || selectedPlatforms.length === 0 || !scheduleDate || !scheduleTime) return
     setIsGenerating(true)
     setGenerateError(null)
 
@@ -239,8 +241,7 @@ export default function CreatePostPage() {
         language,
         tone,
         date: scheduleDate || undefined,
-        startTime: scheduleTime || undefined,
-        endTime: scheduleEndTime || undefined,
+        startTime: scheduleTime,
         files: uploadedFiles.map((f) => f.file),
       })
 
@@ -273,7 +274,7 @@ export default function CreatePostPage() {
         </p> */}
         <button
           onClick={handleGenerate}
-          disabled={!prompt.trim() || selectedPlatforms.length === 0 || isGenerating}
+          disabled={!prompt.trim() || selectedPlatforms.length === 0 || !scheduleDate || !scheduleTime || isGenerating}
           className="flex cursor-pointer items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -294,7 +295,7 @@ export default function CreatePostPage() {
         <div className="flex flex-col gap-3">
           {/* Prompt Console */}
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-            <SectionLabel icon={sectionIcons.prompt} chip={sectionChips.prompt} title="PROMPT CONSOLE" />
+            <SectionLabel icon={sectionIcons.prompt} chip={sectionChips.prompt} title="PROMPT CONSOLE" required />
 
             <textarea
               value={prompt}
@@ -386,14 +387,15 @@ export default function CreatePostPage() {
           {/* Schedule */}
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.schedule} chip={sectionChips.schedule} title="SCHEDULE" />
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="schedule-date" className="mb-1.5 block text-xs font-medium text-neutral-500">
-                  Date
+                  Date <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="schedule-date"
                   type="date"
+                  required
                   value={scheduleDate}
                   onChange={(e) => setScheduleDate(e.target.value)}
                   className={inputClass}
@@ -401,25 +403,14 @@ export default function CreatePostPage() {
               </div>
               <div>
                 <label htmlFor="schedule-time" className="mb-1.5 block text-xs font-medium text-neutral-500">
-                  Start Time
+                  Post Time <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="schedule-time"
                   type="time"
+                  required
                   value={scheduleTime}
                   onChange={(e) => setScheduleTime(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label htmlFor="schedule-end-time" className="mb-1.5 block text-xs font-medium text-neutral-500">
-                  End Time
-                </label>
-                <input
-                  id="schedule-end-time"
-                  type="time"
-                  value={scheduleEndTime}
-                  onChange={(e) => setScheduleEndTime(e.target.value)}
                   className={inputClass}
                 />
               </div>
@@ -562,7 +553,7 @@ export default function CreatePostPage() {
 
           {/* Platform Target */}
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-            <SectionLabel icon={sectionIcons.target} chip={sectionChips.target} title="PLATFORM TARGET" />
+            <SectionLabel icon={sectionIcons.target} chip={sectionChips.target} title="PLATFORM TARGET" required />
             <div className="space-y-3">
               {Object.entries(platformIcons).map(([platform, icon]) => (
                 <label

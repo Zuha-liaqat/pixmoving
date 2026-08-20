@@ -165,6 +165,20 @@ export async function approveGeneratedPosts(postIds, isApproved = true) {
   return res.json()
 }
 
+export async function publishGeneratedPost(postId) {
+  const res = await fetch(`${API_BASE_URL}/generate-post/${postId}/publish`, {
+    method: 'POST',
+  })
+
+  if (!res.ok) {
+    throw new Error(
+      await extractErrorMessage(res, `Failed to publish post (${res.status})`),
+    )
+  }
+
+  return res.json()
+}
+
 export async function fetchCalendarPosts({ platform, isPosted } = {}) {
   const params = new URLSearchParams()
   if (platform) params.set('platform', platform)

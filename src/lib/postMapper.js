@@ -44,6 +44,7 @@ export function mapApiPost(raw, index = 0) {
     score,
     status,
     isApproved: Boolean(raw.is_approved),
+    isPosted: Boolean(raw.is_posted),
     timestamp: formatTimestamp(raw.created_at),
     language: raw.language ?? '',
     tone: raw.tone ?? '',
