@@ -1,10 +1,11 @@
 import { useMemo, useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, Eye, Plus, X } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { getQueueItemById } from '../data/posts'
 import { fetchCalendarPosts } from '../lib/api'
 import { mapApiPost } from '../lib/postMapper'
+import PostPreviewModal from '../components/PostPreviewModal'
 
 const WEEKDAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
@@ -669,6 +670,7 @@ export default function CalendarPage() {
   const todaysEvent = eventsByDate.find((ev) => isSameDay(ev.date, today))
   const [selected, setSelected] = useState(todaysEvent ?? null)
   const [scheduleDate, setScheduleDate] = useState(null)
+  const [previewEvent, setPreviewEvent] = useState(null)
 
   const selectedWithImages = useMemo(() => {
     if (!selected) return null
@@ -953,6 +955,13 @@ export default function CalendarPage() {
 
           <div className="mt-auto flex items-center gap-2 pt-2">
             <button
+              onClick={() => setPreviewEvent(selectedWithImages)}
+              aria-label="Preview post"
+              className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md text-neutral-500 ring-1 ring-neutral-200 transition hover:bg-neutral-50 hover:text-black"
+            >
+              <Eye className="h-4 w-4" />
+            </button>
+            <button
               onClick={() => selectedWithImages.relatedId && navigate(`/approval-queue/${selectedWithImages.relatedId}/edit`)}
               className={`flex-1 rounded-md px-3 py-2 text-sm font-medium ring-1 ring-neutral-200 hover:bg-neutral-50 ${
                 selectedWithImages.relatedId ? 'text-neutral-600' : 'cursor-not-allowed text-neutral-300'
@@ -965,6 +974,19 @@ export default function CalendarPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {previewEvent && (
+        <PostPreviewModal
+          item={{
+            ...previewEvent,
+            caption: previewEvent.description,
+            hashtags: previewEvent.hashtags ?? [],
+            platform: previewEvent.bestPlatform,
+            platforms: previewEvent.platforms ?? [previewEvent.bestPlatform],
+          }}
+          onClose={() => setPreviewEvent(null)}
+        />
       )}
 
       {scheduleDate && (

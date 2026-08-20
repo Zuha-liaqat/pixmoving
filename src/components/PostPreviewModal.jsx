@@ -174,7 +174,7 @@ function PostImages({ item, initials, platform, className = '' }) {
     if (images.length === 1) {
       return (
         <div className={`relative overflow-hidden bg-white ${className}`}>
-          <img src={images[0].dataUri} alt={images[0].name} className="h-full w-full object-contain" />
+          <img src={images[0].dataUri} alt={images[0].name} className="h-full w-full object-cover" />
         </div>
       )
     }
@@ -205,7 +205,7 @@ function PostImages({ item, initials, platform, className = '' }) {
     if (images.length === 1) {
       return (
         <div className={`relative overflow-hidden bg-white ${className}`}>
-          <img src={images[0].dataUri} alt={images[0].name} className="h-full w-full object-contain" />
+          <img src={images[0].dataUri} alt={images[0].name} className="h-full w-full object-cover" />
         </div>
       )
     }
@@ -241,7 +241,7 @@ function PostImages({ item, initials, platform, className = '' }) {
     if (images.length === 1) {
       return (
         <div className={`relative overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200 ${className}`}>
-          <img src={images[0].dataUri} alt={images[0].name} className="h-full w-full object-contain" />
+          <img src={images[0].dataUri} alt={images[0].name} className="h-full w-full object-cover" />
         </div>
       )
     }
