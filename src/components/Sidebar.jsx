@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'grid' },
-  { to: '/themes', label: 'Themes', icon: 'palette' },
+  { to: '/themes', label: 'Themes/Brand', icon: 'palette' },
   { to: '/create-post', label: 'Create Post', icon: 'plus' },
   { to: '/library', label: 'Library', icon: 'folder' },
   { to: '/approval-queue', label: 'Approval Queue', icon: 'check' },
