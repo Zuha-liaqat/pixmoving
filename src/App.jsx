@@ -11,6 +11,7 @@ import PlaceholderPage from './pages/PlaceholderPage'
 import IntegrationsPage from './pages/IntegrationsPage'
 import ThemesPage from './pages/ThemesPage'
 import NotificationChannelsPage from './pages/NotificationChannelsPage'
+import PlannerPage from './pages/PlannerPage'
 import DashboardLayout from './layouts/DashboardLayout'
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/integrations" element={<IntegrationsPage />} />
           <Route path="/notification-channels" element={<NotificationChannelsPage />} />
+          <Route path="/planner" element={<PlannerPage />} />
           <Route
             path="/settings"
             element={<PlaceholderPage title="Settings" />}
