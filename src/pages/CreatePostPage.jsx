@@ -276,23 +276,6 @@ export default function CreatePostPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-3">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-end gap-4">
-        {/* <p className="text-sm text-neutral-500">
-          Describe the content you want to create and let AI assist you.
-        </p> */}
-        <button
-          onClick={handleGenerate}
-          disabled={!prompt.trim() || selectedPlatforms.length === 0 || !scheduleDate || !scheduleTime || isGenerating}
-          className="flex cursor-pointer items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Generate
-        </button>
-      </div>
-
       {generateError && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
           {generateError}
@@ -392,7 +375,7 @@ export default function CreatePostPage() {
 
           </div>
 
-          {/* Platform Target */}
+       
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.target} chip={sectionChips.target} title="PLATFORM TARGET" required />
             <div className="flex flex-wrap gap-3">
@@ -457,7 +440,7 @@ export default function CreatePostPage() {
             </div>
           </div>
 
-          {/* Media */}
+     
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.media} chip={sectionChips.media} title="MEDIA" />
 
@@ -606,11 +589,24 @@ export default function CreatePostPage() {
                 className="w-full rounded-lg border border-neutral-200 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
               />
             </div>
-           
+
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              onClick={handleGenerate}
+              disabled={!prompt.trim() || selectedPlatforms.length === 0 || !scheduleDate || !scheduleTime || isGenerating}
+              className="flex cursor-pointer items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Generate
+            </button>
           </div>
       </div>
 
-      {/* Generation Progress Modal */}
+    
       {isGenerating && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-2xl">

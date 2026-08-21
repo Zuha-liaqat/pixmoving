@@ -5,7 +5,7 @@ import { getUnreadCount } from '../data/notifications'
 const pageTitles = [
   { match: '/dashboard', label: 'Dashboard' },
   { match: '/create-post', label: 'Create Post' },
-  { match: '/themes', label: 'Themes' },
+  { match: '/themes', label: 'Themes/Brand' },
   { match: '/library', label: 'Library' },
   { match: '/approval-queue', label: 'Approval Queue' },
   { match: '/calendar', label: 'Calendar' },
