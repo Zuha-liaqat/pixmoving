@@ -9,6 +9,8 @@ import CalendarPage from './pages/CalendarPage'
 import NotificationsPage from './pages/NotificationsPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 import IntegrationsPage from './pages/IntegrationsPage'
+import ThemesPage from './pages/ThemesPage'
+import NotificationChannelsPage from './pages/NotificationChannelsPage'
 import DashboardLayout from './layouts/DashboardLayout'
 
 function App() {
@@ -23,13 +25,14 @@ function App() {
             element={<DashboardPage />}
           />
           <Route path="/create-post" element={<CreatePostPage />} />
-          <Route path="/themes" element={<PlaceholderPage title="Themes" />} />
+          <Route path="/themes" element={<ThemesPage />} />
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/approval-queue" element={<ApprovalQueuePage />} />
           <Route path="/approval-queue/:id/edit" element={<EditContentPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/integrations" element={<IntegrationsPage />} />
+          <Route path="/notification-channels" element={<NotificationChannelsPage />} />
           <Route
             path="/settings"
             element={<PlaceholderPage title="Settings" />}

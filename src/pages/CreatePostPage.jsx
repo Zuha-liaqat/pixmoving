@@ -131,14 +131,15 @@ const inputClass =
 export default function CreatePostPage() {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
+  const replaceInputRef = useRef(null)
   const dropdownRef = useRef(null)
+  const [replacingId, setReplacingId] = useState(null)
   const [prompt, setPrompt] = useState('')
   const [tone, setTone] = useState('Professional')
   const [language, setLanguage] = useState('EN-US')
   const [referenceUrl, setReferenceUrl] = useState('')
   const [scheduleDate, setScheduleDate] = useState('')
   const [scheduleTime, setScheduleTime] = useState('')
-  const [additionalDetails, setAdditionalDetails] = useState('')
   const [selectedPlatforms, setSelectedPlatforms] = useState([])
   const [tags, setTags] = useState(['#PIXMoving', '#RoboBus'])
   const [newTag, setNewTag] = useState('')
@@ -187,11 +188,8 @@ export default function CreatePostPage() {
   }
 
   function addFiles(files) {
-    const validFiles = files.filter((file) => {
-      const isImage = file.type.startsWith('image/')
-      const isUnder5MB = file.size <= 5 * 1024 * 1024
-      return isImage && isUnder5MB
-    })
+    const validFiles = files.filter((f) => f.type.startsWith('image/') && f.size <= 5 * 1024 * 1024)
+    if (validFiles.length === 0) return
 
     const newFiles = validFiles.map((file) => ({
       id: Date.now() + Math.random(),
@@ -209,6 +207,17 @@ export default function CreatePostPage() {
       const file = prev.find((f) => f.id === id)
       if (file) URL.revokeObjectURL(file.preview)
       return prev.filter((f) => f.id !== id)
+    })
+  }
+
+  function replaceFile(id, newFile) {
+    if (!newFile.type.startsWith('image/') || newFile.size > 5 * 1024 * 1024) return
+    setUploadedFiles((prev) => {
+      const existing = prev.find((f) => f.id === id)
+      if (existing) URL.revokeObjectURL(existing.preview)
+      return prev.map((f) =>
+        f.id === id ? { ...f, file: newFile, name: newFile.name, size: newFile.size, preview: URL.createObjectURL(newFile) } : f,
+      )
     })
   }
 
@@ -266,7 +275,7 @@ export default function CreatePostPage() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="mx-auto max-w-5xl space-y-3">
       {/* Header */}
       <div className="flex flex-wrap items-end justify-end gap-4">
         {/* <p className="text-sm text-neutral-500">
@@ -290,9 +299,7 @@ export default function CreatePostPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        {/* Left Column */}
-        <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
           {/* Prompt Console */}
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.prompt} chip={sectionChips.prompt} title="PROMPT CONSOLE" required />
@@ -382,6 +389,39 @@ export default function CreatePostPage() {
 
               <span className="ml-auto text-xs text-neutral-400">{prompt.length} / 2000 chars</span>
             </div>
+
+          </div>
+
+          {/* Platform Target */}
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+            <SectionLabel icon={sectionIcons.target} chip={sectionChips.target} title="PLATFORM TARGET" required />
+            <div className="flex flex-wrap gap-3">
+              {Object.entries(platformIcons).map(([platform, icon]) => (
+                <label
+                  key={platform}
+                  className={`flex flex-1 min-w-[140px] cursor-pointer select-none items-center gap-3 rounded-lg border p-2.5 transition ${
+                    selectedPlatforms.includes(platform)
+                      ? 'border-brand-300 bg-brand-50'
+                      : 'border-neutral-200 bg-white hover:bg-neutral-50'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedPlatforms.includes(platform)}
+                    onChange={() =>
+                      setSelectedPlatforms((prev) =>
+                        prev.includes(platform) ? prev.filter((p) => p !== platform) : [...prev, platform],
+                      )
+                    }
+                    className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500"
+                  />
+                  <span className="flex items-center gap-2.5">
+                    {icon}
+                    <span className="text-sm font-medium text-neutral-700">{platform}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
 
           {/* Schedule */}
@@ -417,34 +457,9 @@ export default function CreatePostPage() {
             </div>
           </div>
 
-          {/* Reference URL */}
+          {/* Media */}
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-            <SectionLabel icon={sectionIcons.link} chip={sectionChips.link} title="REFERENCE URL" />
-            <div className="relative">
-              <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                <svg className="h-4 w-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-                </svg>
-              </div>
-              <input
-                type="url"
-                value={referenceUrl}
-                onChange={(e) => setReferenceUrl(e.target.value)}
-                placeholder="https://example.com/inspiration"
-                className="w-full rounded-lg border border-neutral-200 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
-              />
-            </div>
-            <p className="mt-2 text-xs text-neutral-400">
-              Add a link for the AI to extract context or analyze style.
-            </p>
-          </div>
-        </div>
-
-        {/* Right Column */}
-        <div className="flex flex-col gap-3">
-          {/* Media Assets */}
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-            <SectionLabel icon={sectionIcons.media} chip={sectionChips.media} title="MEDIA ASSETS" />
+            <SectionLabel icon={sectionIcons.media} chip={sectionChips.media} title="MEDIA" />
 
             <input
               ref={fileInputRef}
@@ -454,68 +469,91 @@ export default function CreatePostPage() {
               onChange={handleFileSelect}
               className="hidden"
             />
+            <input
+              ref={replaceInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file && replacingId) replaceFile(replacingId, file)
+                e.target.value = ''
+              }}
+              className="hidden"
+            />
 
             <div
-              onClick={() => fileInputRef.current?.click()}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition ${
-                isDragOver
-                  ? 'border-brand-500 bg-brand-100'
-                  : 'border-brand-300 bg-white hover:border-brand-400 hover:bg-brand-100/60'
+              className={`flex flex-wrap items-center gap-2.5 rounded-lg p-1 transition ${
+                isDragOver ? 'bg-brand-100 ring-2 ring-brand-400' : ''
               }`}
             >
-              <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-violet-600">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                </svg>
-              </span>
-              <p className="text-sm font-medium text-neutral-600">Drag & drop images here</p>
-              <p className="mt-1 text-xs text-neutral-400">
-                Optional — or click to browse (Max 5MB). Skip this to auto-select from the Library.
-              </p>
-            </div>
-
-            {uploadedFiles.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                {uploadedFiles.map((file) => (
-                  <div key={file.id} className="relative group">
-                    <img
-                      src={file.preview}
-                      alt={file.name}
-                      className="h-24 w-full rounded-lg object-cover"
-                    />
+              {uploadedFiles.map((file) => (
+                <div
+                  key={file.id}
+                  className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200"
+                >
+                  <img src={file.preview} alt={file.name} className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 flex items-center justify-center gap-1 opacity-0 transition group-hover:bg-black/40 group-hover:opacity-100">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setReplacingId(file.id)
+                        replaceInputRef.current?.click()
+                      }}
+                      aria-label="Replace image"
+                      className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white text-neutral-600 shadow-sm hover:text-black"
+                    >
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.75}
+                          d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"
+                        />
+                      </svg>
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
                         removeFile(file.id)
                       }}
-                      className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition group-hover:opacity-100"
+                      aria-label="Remove image"
+                      className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white text-red-500 shadow-sm hover:text-red-600"
                     >
                       <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.75}
+                          d="M14.74 9l-.346 9m-4.788 0L9.26 9M19.228 5.79c1.121.113 2.235.256 3.34.428m-3.34-.428L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c1.105-.172 2.219-.315 3.34-.428m0 0a48.108 48.108 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                        />
                       </svg>
                     </button>
-                    <p className="mt-1 truncate text-xs text-neutral-500">{file.name}</p>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className={`flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed transition ${
+                  isDragOver
+                    ? 'border-brand-500 bg-brand-100'
+                    : 'border-neutral-300 bg-white hover:border-brand-400 hover:bg-brand-50'
+                }`}
+              >
+                <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </button>
+            </div>
           </div>
 
-          {/* Additional Details */}
+          {/* Tags */}
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-            <SectionLabel icon={sectionIcons.details} chip={sectionChips.details} title="ADDITIONAL DETAILS" />
-            <textarea
-              value={additionalDetails}
-              onChange={(e) => setAdditionalDetails(e.target.value)}
-              placeholder="Specific instructions, platform notes (e.g., 'Keep it under 280 characters for Twitter', 'Include #FutureMobility hashtag')..."
-              rows={3}
-              className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
-            />
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <SectionLabel icon={sectionIcons.details} chip={sectionChips.details} title="TAGS" />
+            <div className="flex flex-wrap items-center gap-2">
               {tags.map((tag, i) => (
                 <span
                   key={tag}
@@ -551,34 +589,25 @@ export default function CreatePostPage() {
             </div>
           </div>
 
-          {/* Platform Target */}
+          {/* Reference URL */}
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-            <SectionLabel icon={sectionIcons.target} chip={sectionChips.target} title="PLATFORM TARGET" required />
-            <div className="space-y-3">
-              {Object.entries(platformIcons).map(([platform, icon]) => (
-                <label
-                  key={platform}
-                  className="flex cursor-pointer select-none items-center gap-3 rounded-lg bg-white p-2.5 transition hover:bg-neutral-50"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedPlatforms.includes(platform)}
-                    onChange={() =>
-                      setSelectedPlatforms((prev) =>
-                        prev.includes(platform) ? prev.filter((p) => p !== platform) : [...prev, platform],
-                      )
-                    }
-                    className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500"
-                  />
-                  <span className="flex items-center gap-2.5">
-                    {icon}
-                    <span className="text-sm font-medium text-neutral-700">{platform}</span>
-                  </span>
-                </label>
-              ))}
+            <SectionLabel icon={sectionIcons.link} chip={sectionChips.link} title="REFERENCE URL" />
+            <div className="relative">
+              <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+                <svg className="h-4 w-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                </svg>
+              </div>
+              <input
+                type="url"
+                value={referenceUrl}
+                onChange={(e) => setReferenceUrl(e.target.value)}
+                placeholder="https://example.com/inspiration"
+                className="w-full rounded-lg border border-neutral-200 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              />
             </div>
+           
           </div>
-        </div>
       </div>
 
       {/* Generation Progress Modal */}
