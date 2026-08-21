@@ -147,6 +147,7 @@ export default function CreatePostPage() {
   const [generateError, setGenerateError] = useState(null)
   const [showToneDropdown, setShowToneDropdown] = useState(false)
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false)
+  const [showUrlDialog, setShowUrlDialog] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState([])
   const [isDragOver, setIsDragOver] = useState(false)
 
@@ -161,6 +162,7 @@ export default function CreatePostPage() {
       if (e.key === 'Escape') {
         setShowToneDropdown(false)
         setShowLanguageDropdown(false)
+        setShowUrlDialog(false)
       }
     }
     document.addEventListener('mousedown', handleOutside)
@@ -297,11 +299,37 @@ export default function CreatePostPage() {
 
             <div ref={dropdownRef} className="mt-3 flex flex-wrap items-center gap-3">
               {/* Tone Selector */}
+               <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                aria-label="Add image"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50"
+              >
+                <img src="/image2.png" alt="" className="h-5 w-5 object-contain" />
+              </button>
+                  <button
+                type="button"
+                onClick={() => {
+                  setShowUrlDialog(true)
+                  setShowToneDropdown(false)
+                  setShowLanguageDropdown(false)
+                }}
+                aria-label="Reference URL"
+                className={
+                  referenceUrl
+                    ? 'flex max-w-[180px] items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50'
+                    : 'flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50'
+                }
+              >
+              <img src="/url3.jfif" alt="" className="h-5 w-5 object-contain" />
+                {referenceUrl && <span className="truncate">{referenceUrl}</span>}
+              </button>
               <div className="relative">
                 <button
                   onClick={() => {
                     setShowToneDropdown(!showToneDropdown)
                     setShowLanguageDropdown(false)
+                    setShowUrlDialog(false)
                   }}
                   className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
                 >
@@ -339,6 +367,7 @@ export default function CreatePostPage() {
                   onClick={() => {
                     setShowLanguageDropdown(!showLanguageDropdown)
                     setShowToneDropdown(false)
+                    setShowUrlDialog(false)
                   }}
                   className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
                 >
@@ -370,12 +399,112 @@ export default function CreatePostPage() {
                 )}
               </div>
 
+              {/* Reference URL */}
+          
+
               <span className="ml-auto text-xs text-neutral-400">{prompt.length} / 2000 chars</span>
             </div>
 
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <input
+              ref={replaceInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file && replacingId) replaceFile(replacingId, file)
+                e.target.value = ''
+              }}
+              className="hidden"
+            />
+
+            <div
+  onDragOver={handleDragOver}
+  onDragLeave={handleDragLeave}
+  onDrop={handleDrop}
+  className={`rounded-lg transition ${
+    uploadedFiles.length > 0 ? 'mt-3 border-t border-neutral-200 pt-3' : ''
+  } ${isDragOver ? 'bg-brand-50' : ''}`}
+>
+              {/* <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                aria-label="Add image"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md transition hover:bg-neutral-100"
+              >
+                <img src="/image.png" alt="" className="h-5 w-5 object-contain" />
+              </button> */}
+
+              {uploadedFiles.length > 0 && (
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  {uploadedFiles.map((file) => (
+                    <div
+                      key={file.id}
+                      className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200"
+                    >
+                      <img src={file.preview} alt={file.name} className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 flex items-center justify-center gap-1.5 opacity-0 transition group-hover:bg-black/40 group-hover:opacity-100">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setReplacingId(file.id)
+                            replaceInputRef.current?.click()
+                          }}
+                          aria-label="Replace image"
+                          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white text-neutral-600 shadow-sm hover:text-black"
+                        >
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.75}
+                              d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removeFile(file.id)
+                          }}
+                          aria-label="Remove image"
+                          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white text-red-500 shadow-sm hover:text-red-600"
+                        >
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.75}
+                              d="M14.74 9l-.346 9m-4.788 0L9.26 9M19.228 5.79c1.121.113 2.235.256 3.34.428m-3.34-.428L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c1.105-.172 2.219-.315 3.34-.428m0 0a48.108 48.108 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    aria-label="Add another image"
+                    className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-brand-500 text-white shadow-sm transition hover:bg-brand-600"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-       
+          {/* Platform Target */}
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.target} chip={sectionChips.target} title="PLATFORM TARGET" required />
             <div className="flex flex-wrap gap-3">
@@ -440,99 +569,6 @@ export default function CreatePostPage() {
             </div>
           </div>
 
-     
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-            <SectionLabel icon={sectionIcons.media} chip={sectionChips.media} title="MEDIA" />
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-            <input
-              ref={replaceInputRef}
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file && replacingId) replaceFile(replacingId, file)
-                e.target.value = ''
-              }}
-              className="hidden"
-            />
-
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`flex flex-wrap items-center gap-2.5 rounded-lg p-1 transition ${
-                isDragOver ? 'bg-brand-100 ring-2 ring-brand-400' : ''
-              }`}
-            >
-              {uploadedFiles.map((file) => (
-                <div
-                  key={file.id}
-                  className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200"
-                >
-                  <img src={file.preview} alt={file.name} className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 flex items-center justify-center gap-1 opacity-0 transition group-hover:bg-black/40 group-hover:opacity-100">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setReplacingId(file.id)
-                        replaceInputRef.current?.click()
-                      }}
-                      aria-label="Replace image"
-                      className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white text-neutral-600 shadow-sm hover:text-black"
-                    >
-                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.75}
-                          d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        removeFile(file.id)
-                      }}
-                      aria-label="Remove image"
-                      className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white text-red-500 shadow-sm hover:text-red-600"
-                    >
-                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.75}
-                          d="M14.74 9l-.346 9m-4.788 0L9.26 9M19.228 5.79c1.121.113 2.235.256 3.34.428m-3.34-.428L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c1.105-.172 2.219-.315 3.34-.428m0 0a48.108 48.108 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className={`flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed transition ${
-                  isDragOver
-                    ? 'border-brand-500 bg-brand-100'
-                    : 'border-neutral-300 bg-white hover:border-brand-400 hover:bg-brand-50'
-                }`}
-              >
-                <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
           {/* Tags */}
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.details} chip={sectionChips.details} title="TAGS" />
@@ -572,26 +608,6 @@ export default function CreatePostPage() {
             </div>
           </div>
 
-          {/* Reference URL */}
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-            <SectionLabel icon={sectionIcons.link} chip={sectionChips.link} title="REFERENCE URL" />
-            <div className="relative">
-              <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                <svg className="h-4 w-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-                </svg>
-              </div>
-              <input
-                type="url"
-                value={referenceUrl}
-                onChange={(e) => setReferenceUrl(e.target.value)}
-                placeholder="https://example.com/inspiration"
-                className="w-full rounded-lg border border-neutral-200 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
-              />
-            </div>
-
-          </div>
-
           <div className="flex justify-end">
             <button
               onClick={handleGenerate}
@@ -607,6 +623,60 @@ export default function CreatePostPage() {
       </div>
 
     
+      {showUrlDialog && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setShowUrlDialog(false)}
+        >
+          <form
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={(e) => {
+              e.preventDefault()
+              setShowUrlDialog(false)
+            }}
+            className="w-full max-w-sm rounded-xl bg-white p-5 shadow-2xl"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-bold tracking-wide text-neutral-800">REFERENCE URL</h3>
+              <button
+                type="button"
+                onClick={() => setShowUrlDialog(false)}
+                aria-label="Close"
+                className="cursor-pointer rounded-md p-1 text-neutral-400 transition hover:bg-neutral-100 hover:text-black"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <input
+              type="url"
+              autoFocus
+              value={referenceUrl}
+              onChange={(e) => setReferenceUrl(e.target.value)}
+              placeholder="https://example.com/inspiration"
+              className={inputClass}
+            />
+            <p className="mt-2 text-xs text-neutral-400">Used by the AI for context or style.</p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowUrlDialog(false)}
+                className="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-neutral-600 ring-1 ring-neutral-200 transition hover:bg-neutral-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="cursor-pointer rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {isGenerating && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-2xl">
