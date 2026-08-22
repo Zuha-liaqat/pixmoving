@@ -291,13 +291,14 @@ export default function EditContentPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="mb-2 text-xs font-semibold tracking-widest text-neutral-400">
-              DATE
+              DATE <span className="text-red-500">*</span>
             </p>
             <input
               type="date"
+              required
               value={date}
               onChange={(e) => setDate(e.target.value)}
               className={fieldClass}
@@ -305,23 +306,13 @@ export default function EditContentPage() {
           </div>
           <div>
             <p className="mb-2 text-xs font-semibold tracking-widest text-neutral-400">
-              START TIME
+              POST TIME <span className="text-red-500">*</span>
             </p>
             <input
               type="time"
+              required
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              className={fieldClass}
-            />
-          </div>
-          <div>
-            <p className="mb-2 text-xs font-semibold tracking-widest text-neutral-400">
-              END TIME
-            </p>
-            <input
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
               className={fieldClass}
             />
           </div>

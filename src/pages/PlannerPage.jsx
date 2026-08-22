@@ -13,15 +13,16 @@ const coreThemes = [
 
 const platformData = {
   LinkedIn: (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
   ),
   Instagram: (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="pl-ig" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#FEDA75" /><stop offset="25%" stopColor="#FA7E1E" /><stop offset="50%" stopColor="#D62976" /><stop offset="75%" stopColor="#962FBF" /><stop offset="100%" stopColor="#4F5BD5" /></linearGradient></defs><rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="url(#pl-ig)" strokeWidth="2" /><circle cx="12" cy="12" r="4.2" stroke="url(#pl-ig)" strokeWidth="2" /><circle cx="17.3" cy="6.7" r="1.2" fill="url(#pl-ig)" /></svg>
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="pl-ig" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#FEDA75" /><stop offset="25%" stopColor="#FA7E1E" /><stop offset="50%" stopColor="#D62976" /><stop offset="75%" stopColor="#962FBF" /><stop offset="100%" stopColor="#4F5BD5" /></linearGradient></defs><rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="url(#pl-ig)" strokeWidth="2" /><circle cx="12" cy="12" r="4.2" stroke="url(#pl-ig)" strokeWidth="2" /><circle cx="17.3" cy="6.7" r="1.2" fill="url(#pl-ig)" /></svg>
   ),
 }
 
 function GenerateView({ period, onBack, onGenerate }) {
   const fileInputRef = useRef(null)
+  const replaceInputRef = useRef(null)
   const toneRef = useRef(null)
   const langRef = useRef(null)
   const [prompt, setPrompt] = useState('')
@@ -30,10 +31,14 @@ function GenerateView({ period, onBack, onGenerate }) {
   const [showToneDropdown, setShowToneDropdown] = useState(false)
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false)
   const [referenceUrl, setReferenceUrl] = useState('')
+  const [urlDraft, setUrlDraft] = useState('')
   const [showUrlInput, setShowUrlInput] = useState(false)
   const [frequency, setFrequency] = useState(period === 'monthly' ? 20 : 5)
   const [selectedPlatforms, setSelectedPlatforms] = useState(['Instagram'])
   const [selectedThemes, setSelectedThemes] = useState(['Product Innovation', 'Behind the Scenes'])
+  const [uploadedFiles, setUploadedFiles] = useState([])
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [replacingId, setReplacingId] = useState(null)
 
   useEffect(() => {
     function handle(e) {
@@ -53,6 +58,61 @@ function GenerateView({ period, onBack, onGenerate }) {
 
   function toggleTheme(t) {
     setSelectedThemes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))
+  }
+
+  function addFiles(files) {
+    const validFiles = files.filter((f) => f.type.startsWith('image/') && f.size <= 5 * 1024 * 1024)
+    if (validFiles.length === 0) return
+
+    const newFiles = validFiles.map((file) => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      size: file.size,
+      file,
+      preview: URL.createObjectURL(file),
+    }))
+
+    setUploadedFiles((prev) => [...prev, ...newFiles])
+  }
+
+  function handleFileSelect(e) {
+    addFiles(Array.from(e.target.files))
+    e.target.value = ''
+  }
+
+  function removeFile(id) {
+    setUploadedFiles((prev) => {
+      const file = prev.find((f) => f.id === id)
+      if (file) URL.revokeObjectURL(file.preview)
+      return prev.filter((f) => f.id !== id)
+    })
+  }
+
+  function replaceFile(id, newFile) {
+    if (!newFile.type.startsWith('image/') || newFile.size > 5 * 1024 * 1024) return
+    setUploadedFiles((prev) => {
+      const existing = prev.find((f) => f.id === id)
+      if (existing) URL.revokeObjectURL(existing.preview)
+      return prev.map((f) =>
+        f.id === id ? { ...f, file: newFile, name: newFile.name, size: newFile.size, preview: URL.createObjectURL(newFile) } : f,
+      )
+    })
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault()
+    setIsDragOver(true)
+  }
+
+  function handleDragLeave(e) {
+    e.preventDefault()
+    setIsDragOver(false)
+  }
+
+  function handleDrop(e) {
+    e.preventDefault()
+    setIsDragOver(false)
+    addFiles(Array.from(e.dataTransfer.files))
   }
 
   return (
@@ -78,47 +138,146 @@ function GenerateView({ period, onBack, onGenerate }) {
               </span>
               <h3 className="text-sm font-bold tracking-wide text-neutral-800">PROMPT CONSOLE</h3>
             </div>
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe the posts in detail. e.g., 'Write professional LinkedIn posts announcing our new autonomous coffee cart fleet in Tokyo...'"
-              rows={11}
-              className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
-            />
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                aria-label="Add image"
-                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50"
-              >
-                <svg className="h-5 w-5 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-              </button>
-              <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" />
-              <button
-                type="button"
-                onClick={() => setShowUrlInput(!showUrlInput)}
-                aria-label="Reference URL"
-                className={
-                  referenceUrl
-                    ? 'flex max-w-[180px] items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50'
-                    : 'flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50'
-                }
-              >
-                <svg className="h-5 w-5 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>
-                {referenceUrl && <span className="truncate">{referenceUrl}</span>}
-              </button>
-              {showUrlInput && (
+            <div className="relative">
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe the posts in detail. e.g., 'Write professional LinkedIn posts announcing our new autonomous coffee cart fleet in Tokyo...'"
+                rows={11}
+                className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-4 pb-12 pt-3 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              />
+              <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-center gap-2">
+                {/* Add Image */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  aria-label="Add image"
+                  className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50"
+                >
+                  <img src="/image2.png" alt="" className="h-5 w-5 object-contain" />
+                </button>
                 <input
-                  type="url"
-                  value={referenceUrl}
-                  onChange={(e) => setReferenceUrl(e.target.value)}
-                  onBlur={() => { if (!referenceUrl) setShowUrlInput(false) }}
-                  placeholder="https://example.com/inspiration"
-                  className="w-60 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
-                  autoFocus
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="hidden"
                 />
+                <input
+                  ref={replaceInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file && replacingId) replaceFile(replacingId, file)
+                    e.target.value = ''
+                  }}
+                  className="hidden"
+                />
+
+                {/* Reference URL */}
+                <div
+                  className={
+                    referenceUrl
+                      ? 'flex w-64 items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600'
+                      : 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50'
+                  }
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUrlDraft(referenceUrl)
+                      setShowUrlInput(true)
+                    }}
+                    aria-label="Reference URL"
+                    className="flex shrink-0 cursor-pointer items-center justify-center"
+                  >
+                    <img src="/url3.jfif" alt="" className="h-5 w-5 object-contain" />
+                  </button>
+                  {referenceUrl && (
+                    <input
+                      readOnly
+                      value={referenceUrl}
+                      className="min-w-0 flex-1 border-none bg-transparent p-0 text-sm text-neutral-600 outline-none"
+                    />
+                  )}
+                </div>
+
+                <span className="ml-auto text-xs text-neutral-400">{prompt.length} / 2000 chars</span>
+              </div>
+            </div>
+
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`rounded-lg transition ${uploadedFiles.length > 0 ? 'mt-3' : ''} ${
+                isDragOver ? 'bg-brand-50' : ''
+              }`}
+            >
+              {uploadedFiles.length > 0 && (
+                <div className="flex flex-wrap items-center gap-3">
+                  {uploadedFiles.map((file) => (
+                    <div
+                      key={file.id}
+                      className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200"
+                    >
+                      <img src={file.preview} alt={file.name} className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 flex items-center justify-center gap-1.5 opacity-0 transition group-hover:bg-black/40 group-hover:opacity-100">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setReplacingId(file.id)
+                            replaceInputRef.current?.click()
+                          }}
+                          aria-label="Replace image"
+                          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white text-neutral-600 shadow-sm hover:text-black"
+                        >
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.75}
+                              d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removeFile(file.id)
+                          }}
+                          aria-label="Remove image"
+                          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white text-red-500 shadow-sm hover:text-red-600"
+                        >
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.75}
+                              d="M14.74 9l-.346 9m-4.788 0L9.26 9M19.228 5.79c1.121.113 2.235.256 3.34.428m-3.34-.428L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c1.105-.172 2.219-.315 3.34-.428m0 0a48.108 48.108 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    aria-label="Add another image"
+                    className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-brand-500 text-white shadow-sm transition hover:bg-brand-600"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                  </button>
+                </div>
               )}
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-3">
               <div ref={toneRef} className="relative">
                 <button
                   type="button"
@@ -157,7 +316,6 @@ function GenerateView({ period, onBack, onGenerate }) {
                   </div>
                 )}
               </div>
-              <span className="ml-auto text-xs text-neutral-400">{prompt.length} / 2000 chars</span>
             </div>
           </div>
         </div>
@@ -184,22 +342,27 @@ function GenerateView({ period, onBack, onGenerate }) {
 
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <label className="mb-3 block text-xs font-bold tracking-wide text-neutral-800">PLATFORMS</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {Object.entries(platformData).map(([name, icon]) => {
                 const active = selectedPlatforms.includes(name)
                 return (
-                  <button
+                  <label
                     key={name}
-                    type="button"
-                    onClick={() => togglePlatform(name)}
-                    className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${active
-                      ? 'border border-brand-500 bg-brand-50 text-brand-700'
-                      : 'border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50'
-                      }`}
+                    className={`flex flex-1 min-w-[140px] cursor-pointer select-none items-center gap-3 rounded-lg border p-2.5 transition ${
+                      active ? 'border-brand-300 bg-brand-50' : 'border-neutral-200 bg-white hover:bg-neutral-50'
+                    }`}
                   >
-                    {icon}
-                    {name}
-                  </button>
+                    <input
+                      type="checkbox"
+                      checked={active}
+                      onChange={() => togglePlatform(name)}
+                      className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500"
+                    />
+                    <span className="flex items-center gap-2.5">
+                      {icon}
+                      <span className="text-sm font-medium text-neutral-700">{name}</span>
+                    </span>
+                  </label>
                 )
               })}
             </div>
@@ -246,6 +409,61 @@ function GenerateView({ period, onBack, onGenerate }) {
           Cancel
         </button>
       </div>
+
+      {showUrlInput && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setShowUrlInput(false)}
+        >
+          <form
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={(e) => {
+              e.preventDefault()
+              setReferenceUrl(urlDraft)
+              setShowUrlInput(false)
+            }}
+            className="w-full max-w-sm rounded-xl bg-white p-5 shadow-2xl"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-bold tracking-wide text-neutral-800">REFERENCE URL</h3>
+              <button
+                type="button"
+                onClick={() => setShowUrlInput(false)}
+                aria-label="Close"
+                className="cursor-pointer rounded-md p-1 text-neutral-400 transition hover:bg-neutral-100 hover:text-black"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <input
+              type="url"
+              autoFocus
+              value={urlDraft}
+              onChange={(e) => setUrlDraft(e.target.value)}
+              placeholder="https://example.com/inspiration"
+              className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+            />
+            <p className="mt-2 text-xs text-neutral-400">Used by the AI for context or style.</p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowUrlInput(false)}
+                className="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-neutral-600 ring-1 ring-neutral-200 transition hover:bg-neutral-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="cursor-pointer rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   )
 }
