@@ -22,7 +22,6 @@ const platformData = {
 
 function GenerateView({ period, onBack, onGenerate }) {
   const fileInputRef = useRef(null)
-  const replaceInputRef = useRef(null)
   const toneRef = useRef(null)
   const langRef = useRef(null)
   const [prompt, setPrompt] = useState('')
@@ -38,7 +37,6 @@ function GenerateView({ period, onBack, onGenerate }) {
   const [selectedThemes, setSelectedThemes] = useState(['Product Innovation', 'Behind the Scenes'])
   const [uploadedFiles, setUploadedFiles] = useState([])
   const [isDragOver, setIsDragOver] = useState(false)
-  const [replacingId, setReplacingId] = useState(null)
 
   useEffect(() => {
     function handle(e) {
@@ -88,17 +86,6 @@ function GenerateView({ period, onBack, onGenerate }) {
     })
   }
 
-  function replaceFile(id, newFile) {
-    if (!newFile.type.startsWith('image/') || newFile.size > 5 * 1024 * 1024) return
-    setUploadedFiles((prev) => {
-      const existing = prev.find((f) => f.id === id)
-      if (existing) URL.revokeObjectURL(existing.preview)
-      return prev.map((f) =>
-        f.id === id ? { ...f, file: newFile, name: newFile.name, size: newFile.size, preview: URL.createObjectURL(newFile) } : f,
-      )
-    })
-  }
-
   function handleDragOver(e) {
     e.preventDefault()
     setIsDragOver(true)
@@ -144,137 +131,91 @@ function GenerateView({ period, onBack, onGenerate }) {
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Describe the posts in detail. e.g., 'Write professional LinkedIn posts announcing our new autonomous coffee cart fleet in Tokyo...'"
                 rows={11}
-                className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-4 pb-12 pt-3 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                className={`w-full resize-none rounded-lg border border-neutral-200 bg-white px-4 pt-3 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 ${
+                  uploadedFiles.length > 0 ? 'pb-28' : 'pb-12'
+                }`}
               />
-              <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-center gap-2">
-                {/* Add Image */}
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  aria-label="Add image"
-                  className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50"
-                >
-                  <img src="/image2.png" alt="" className="h-5 w-5 object-contain" />
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-                <input
-                  ref={replaceInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file && replacingId) replaceFile(replacingId, file)
-                    e.target.value = ''
-                  }}
-                  className="hidden"
-                />
-
-                {/* Reference URL */}
-                <div
-                  className={
-                    referenceUrl
-                      ? 'flex w-64 items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600'
-                      : 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50'
-                  }
-                >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`absolute inset-x-3 bottom-3 flex flex-col-reverse gap-2 rounded-lg transition ${
+                  isDragOver ? 'bg-brand-50' : ''
+                }`}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Add Image */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setUrlDraft(referenceUrl)
-                      setShowUrlInput(true)
-                    }}
-                    aria-label="Reference URL"
-                    className="flex shrink-0 cursor-pointer items-center justify-center"
+                    onClick={() => fileInputRef.current?.click()}
+                    aria-label="Add image"
+                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50"
                   >
-                    <img src="/url3.jfif" alt="" className="h-5 w-5 object-contain" />
+                    <img src="/image2.png" alt="" className="h-5 w-5 object-contain" />
                   </button>
-                  {referenceUrl && (
-                    <input
-                      readOnly
-                      value={referenceUrl}
-                      className="min-w-0 flex-1 border-none bg-transparent p-0 text-sm text-neutral-600 outline-none"
-                    />
-                  )}
+                  {/* Reference URL */}
+                  <div
+                    className={
+                      referenceUrl
+                        ? 'flex w-64 items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600'
+                        : 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50'
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUrlDraft(referenceUrl)
+                        setShowUrlInput(true)
+                      }}
+                      aria-label="Reference URL"
+                      className="flex shrink-0 cursor-pointer items-center justify-center"
+                    >
+                      <img src="/url3.jfif" alt="" className="h-5 w-5 object-contain" />
+                    </button>
+                    {referenceUrl && (
+                      <input
+                        readOnly
+                        value={referenceUrl}
+                        className="min-w-0 flex-1 border-none bg-transparent p-0 text-sm text-neutral-600 outline-none"
+                      />
+                    )}
+                  </div>
+
+                  <span className="ml-auto text-xs text-neutral-400">{prompt.length} / 2000 chars</span>
                 </div>
 
-                <span className="ml-auto text-xs text-neutral-400">{prompt.length} / 2000 chars</span>
-              </div>
-            </div>
-
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`rounded-lg transition ${uploadedFiles.length > 0 ? 'mt-3' : ''} ${
-                isDragOver ? 'bg-brand-50' : ''
-              }`}
-            >
-              {uploadedFiles.length > 0 && (
-                <div className="flex flex-wrap items-center gap-3">
-                  {uploadedFiles.map((file) => (
-                    <div
-                      key={file.id}
-                      className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200"
-                    >
-                      <img src={file.preview} alt={file.name} className="h-full w-full object-cover" />
-                      <div className="absolute inset-0 flex items-center justify-center gap-1.5 opacity-0 transition group-hover:bg-black/40 group-hover:opacity-100">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setReplacingId(file.id)
-                            replaceInputRef.current?.click()
-                          }}
-                          aria-label="Replace image"
-                          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white text-neutral-600 shadow-sm hover:text-black"
-                        >
-                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={1.75}
-                              d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"
-                            />
-                          </svg>
-                        </button>
+                {uploadedFiles.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-4 bg-white px-1 pb-1 pt-2">
+                    {uploadedFiles.map((file) => (
+                      <div key={file.id} className="relative h-16 w-16 shrink-0">
+                        <div className="h-full w-full overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200">
+                          <img src={file.preview} alt={file.name} className="h-full w-full object-cover" />
+                        </div>
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
                             removeFile(file.id)
                           }}
                           aria-label="Remove image"
-                          className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white text-red-500 shadow-sm hover:text-red-600"
+                          className="absolute -right-1.5 -top-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-neutral-800 text-white shadow-sm ring-2 ring-white transition hover:bg-black"
                         >
                           <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={1.75}
-                              d="M14.74 9l-.346 9m-4.788 0L9.26 9M19.228 5.79c1.121.113 2.235.256 3.34.428m-3.34-.428L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c1.105-.172 2.219-.315 3.34-.428m0 0a48.108 48.108 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                            />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
                       </div>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    aria-label="Add another image"
-                    className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-brand-500 text-white shadow-sm transition hover:bg-brand-600"
-                  >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                  </button>
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -508,8 +449,8 @@ export default function PlannerPage() {
               onClick={() => setIsMonthly(false)}
               className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${
                 !isMonthly
-                  ? 'bg-white text-black shadow-sm'
-                  : 'bg-transparent text-neutral-500 hover:bg-[#0A66C2]/10 hover:text-[#0A66C2]'
+                  ? 'bg-brand-500 text-white shadow-sm'
+                  : 'bg-transparent text-neutral-500 hover:bg-brand-50 hover:text-brand-700'
               }`}
             >
               Weekly
@@ -518,8 +459,8 @@ export default function PlannerPage() {
               onClick={() => setIsMonthly(true)}
               className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${
                 isMonthly
-                  ? 'bg-white text-black shadow-sm'
-                  : 'bg-transparent text-neutral-500 hover:bg-[#0A66C2]/10 hover:text-[#0A66C2]'
+                  ? 'bg-brand-500 text-white shadow-sm'
+                  : 'bg-transparent text-neutral-500 hover:bg-brand-50 hover:text-brand-700'
               }`}
             >
               Monthly
@@ -537,8 +478,8 @@ export default function PlannerPage() {
               onClick={() => setAutoSchedule(false)}
               className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${
                 !autoSchedule
-                  ? 'bg-white text-black shadow-sm'
-                  : 'bg-transparent text-neutral-500 hover:bg-[#0A66C2]/10 hover:text-[#0A66C2]'
+                  ? 'bg-brand-500 text-white shadow-sm'
+                  : 'bg-transparent text-neutral-500 hover:bg-brand-50 hover:text-brand-700'
               }`}
             >
               Auto-Schedule
@@ -547,8 +488,8 @@ export default function PlannerPage() {
               onClick={() => setAutoSchedule(true)}
               className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition ${
                 autoSchedule
-                  ? 'bg-white text-black shadow-sm'
-                  : 'bg-transparent text-neutral-500 hover:bg-[#0A66C2]/10 hover:text-[#0A66C2]'
+                  ? 'bg-brand-500 text-white shadow-sm'
+                  : 'bg-transparent text-neutral-500 hover:bg-brand-50 hover:text-brand-700'
               }`}
             >
               Manual Approval
