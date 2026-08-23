@@ -121,14 +121,6 @@ function startOfWeek(date) {
   return addDays(d, -offset)
 }
 
-function formatTime(t) {
-  const [h, m] = t.split(':')
-  const hour = Number(h)
-  const ampm = hour >= 12 ? 'PM' : 'AM'
-  const hour12 = hour % 12 === 0 ? 12 : hour % 12
-  return `${hour12}:${m} ${ampm}`
-}
-
 function formatTime24(t) {
   if (!t) return '09:00 AM'
   const [h, m] = t.split(':').map(Number)
@@ -154,244 +146,6 @@ function truncateTitle(title, wordLimit = 2) {
   const words = title.trim().split(/\s+/)
   if (words.length <= wordLimit) return title
   return `${words.slice(0, wordLimit).join(' ')}...`
-}
-
-function ScheduleModal({ date, onClose, onSave }) {
-  const fileInputRef = useRef(null)
-  const dropdownRef = useRef(null)
-  const [prompt, setPrompt] = useState('')
-  const [tone, setTone] = useState('Professional')
-  const [language, setLanguage] = useState('EN-US')
-  const [referenceUrl, setReferenceUrl] = useState('')
-  const [scheduleTime, setScheduleTime] = useState('09:00')
-  const [scheduleEndTime, setScheduleEndTime] = useState('09:30')
-  const [additionalDetails, setAdditionalDetails] = useState('')
-  const [selectedPlatform, setSelectedPlatform] = useState(null)
-  const [tags, setTags] = useState(['#PIXMoving', '#RoboBus'])
-  const [newTag, setNewTag] = useState('')
-  const [showToneDropdown, setShowToneDropdown] = useState(false)
-  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false)
-  const [uploadedFiles, setUploadedFiles] = useState([])
-  const [isDragOver, setIsDragOver] = useState(false)
-
-  useEffect(() => {
-    function handleOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowToneDropdown(false)
-        setShowLanguageDropdown(false)
-      }
-    }
-    document.addEventListener('mousedown', handleOutside)
-    return () => document.removeEventListener('mousedown', handleOutside)
-  }, [])
-
-  function addTag(tag) {
-    const clean = tag.trim().replace(/^#*/, '#')
-    if (clean.length > 1 && !tags.includes(clean)) setTags((p) => [...p, clean])
-  }
-  function removeTag(tag) { setTags((p) => p.filter((t) => t !== tag)) }
-
-  function addFiles(files) {
-    const valid = files.filter((f) => f.type.startsWith('image/') && f.size <= 5 * 1024 * 1024)
-    setUploadedFiles((p) => [...p, ...valid.map((f) => ({ id: Date.now() + Math.random(), name: f.name, file: f, preview: URL.createObjectURL(f) }))])
-  }
-  function removeFile(id) {
-    setUploadedFiles((p) => { const f = p.find((x) => x.id === id); if (f) URL.revokeObjectURL(f.preview); return p.filter((x) => x.id !== id) })
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault()
-    if (!prompt.trim() || !selectedPlatform) return
-    const dateStr = date.toISOString().slice(0, 10)
-    onSave({
-      title: prompt.trim().slice(0, 60),
-      platform: selectedPlatform,
-      time: formatTime(scheduleTime),
-      endTime: formatTime(scheduleEndTime),
-      hashtags: tags,
-      description: prompt.trim(),
-      caption: prompt.trim(),
-      additionalDetails,
-      referenceUrl,
-      tone,
-      language,
-      date: dateStr,
-    })
-  }
-
-  const inputClass = 'w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20'
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-10 sm:items-start sm:pt-16 overflow-y-auto">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-5xl rounded-xl border border-neutral-200 bg-white p-5 shadow-2xl mb-10"
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-base font-semibold text-black">Create Post</h3>
-          <button type="button" onClick={onClose} aria-label="Close" className="rounded-full p-1.5 text-neutral-400 transition hover:bg-neutral-100 hover:text-black">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="mb-4 flex items-center gap-2 rounded-lg bg-brand-50 px-3 py-2.5 text-sm font-medium text-brand-700">
-          <CalendarDays className="h-4 w-4 shrink-0" />
-          {date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <div className="flex flex-col gap-3">
-            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-              <CpSectionLabel icon={cpSectionIcons.prompt} chip={cpSectionChips.prompt} title="PROMPT CONSOLE" />
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe the post in detail..."
-                rows={8}
-                className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
-              />
-              <div ref={dropdownRef} className="mt-3 flex flex-wrap items-center gap-3">
-                <div className="relative">
-                  <button type="button" onClick={() => { setShowToneDropdown(!showToneDropdown); setShowLanguageDropdown(false) }}
-                    className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50">
-                    Tone: {tone}
-                    <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-                  </button>
-                  {showToneDropdown && (
-                    <div className="absolute left-0 top-full z-10 mt-1 w-48 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
-                      {toneOptions.map((o) => (
-                        <button key={o} type="button" onClick={() => { setTone(o); setShowToneDropdown(false) }}
-                          className={`w-full px-3 py-2 text-left text-sm transition hover:bg-neutral-50 ${tone === o ? 'bg-brand-50 font-medium text-brand-700' : 'text-neutral-600'}`}>{o}</button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="relative">
-                  <button type="button" onClick={() => { setShowLanguageDropdown(!showLanguageDropdown); setShowToneDropdown(false) }}
-                    className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50">
-                    {language}
-                    <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-                  </button>
-                  {showLanguageDropdown && (
-                    <div className="absolute left-0 top-full z-10 mt-1 w-32 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
-                      {languageOptions.map((o) => (
-                        <button key={o} type="button" onClick={() => { setLanguage(o); setShowLanguageDropdown(false) }}
-                          className={`w-full px-3 py-2 text-left text-sm transition hover:bg-neutral-50 ${language === o ? 'bg-brand-50 font-medium text-brand-700' : 'text-neutral-600'}`}>{o}</button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <span className="ml-auto text-xs text-neutral-400">{prompt.length} / 2000 chars</span>
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-              <CpSectionLabel icon={cpSectionIcons.schedule} chip={cpSectionChips.schedule} title="SCHEDULE" />
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-neutral-500">Start Time</label>
-                  <input type="time" value={scheduleTime} onChange={(e) => setScheduleTime(e.target.value)} className={inputClass} />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-neutral-500">End Time</label>
-                  <input type="time" value={scheduleEndTime} onChange={(e) => setScheduleEndTime(e.target.value)} className={inputClass} />
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-              <CpSectionLabel icon={cpSectionIcons.link} chip={cpSectionChips.link} title="REFERENCE URL" />
-              <div className="relative">
-                <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                  <svg className="h-4 w-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>
-                </div>
-                <input type="url" value={referenceUrl} onChange={(e) => setReferenceUrl(e.target.value)} placeholder="https://example.com/inspiration"
-                  className="w-full rounded-lg border border-neutral-200 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20" />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-              <CpSectionLabel icon={cpSectionIcons.media} chip={cpSectionChips.media} title="MEDIA ASSETS" />
-              <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={(e) => addFiles(Array.from(e.target.files))} className="hidden" />
-              <div onClick={() => fileInputRef.current?.click()} onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }} onDragLeave={(e) => { e.preventDefault(); setIsDragOver(false) }}
-                onDrop={(e) => { e.preventDefault(); setIsDragOver(false); addFiles(Array.from(e.dataTransfer.files)) }}
-                className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition ${isDragOver ? 'border-brand-500 bg-brand-100' : 'border-brand-300 bg-white hover:border-brand-400 hover:bg-brand-100/60'}`}>
-                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-violet-600">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                </span>
-                <p className="text-sm font-medium text-neutral-600">Drag & drop images here</p>
-                <p className="mt-1 text-xs text-neutral-400">Optional — or click to browse (Max 5MB)</p>
-              </div>
-              {uploadedFiles.length > 0 && (
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  {uploadedFiles.map((file) => (
-                    <div key={file.id} className="relative group">
-                      <img src={file.preview} alt={file.name} className="h-24 w-full rounded-lg object-cover" />
-                      <button type="button" onClick={(e) => { e.stopPropagation(); removeFile(file.id) }}
-                        className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition group-hover:opacity-100">
-                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
-                      </button>
-                      <p className="mt-1 truncate text-xs text-neutral-500">{file.name}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-              <CpSectionLabel icon={cpSectionIcons.details} chip={cpSectionChips.details} title="ADDITIONAL DETAILS" />
-              <textarea value={additionalDetails} onChange={(e) => setAdditionalDetails(e.target.value)}
-                placeholder="Specific instructions, platform notes..." rows={3}
-                className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20" />
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                {tags.map((tag, i) => (
-                  <span key={tag} className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${cpTagColors[i % cpTagColors.length]}`}>
-                    {tag}
-                    <button type="button" onClick={() => removeTag(tag)} className="opacity-60 transition hover:opacity-100">
-                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  </span>
-                ))}
-                <form onSubmit={(e) => { e.preventDefault(); addTag(newTag); setNewTag('') }} className="flex items-center">
-                  <input value={newTag} onChange={(e) => setNewTag(e.target.value)} placeholder="+ Tag"
-                    className="w-20 rounded-full border border-dashed border-brand-300 bg-white px-3 py-1 text-xs outline-none focus:border-brand-500" />
-                </form>
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-              <CpSectionLabel icon={cpSectionIcons.target} chip={cpSectionChips.target} title="PLATFORM TARGET" />
-              <div className="space-y-3">
-                {Object.entries(cpPlatformIcons).map(([platform, icon]) => (
-                  <label key={platform} className="flex cursor-pointer select-none items-center gap-3 rounded-lg bg-white p-2.5 transition hover:bg-neutral-50">
-                    <input type="checkbox" checked={selectedPlatform === platform}
-                      onChange={() => setSelectedPlatform((prev) => (prev === platform ? null : platform))}
-                      className="h-4 w-4 cursor-pointer rounded border-neutral-300 accent-brand-500" />
-                    <span className="flex items-center gap-2.5">
-                      {icon}
-                      <span className="text-sm font-medium text-neutral-700">{platform}</span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 flex items-center justify-end gap-2">
-          <button type="button" onClick={onClose} className="rounded-md px-3 py-2 text-sm font-medium text-neutral-600 ring-1 ring-neutral-200 hover:bg-neutral-50">
-            Cancel
-          </button>
-          <button type="submit" disabled={!prompt.trim() || !selectedPlatform}
-            className="flex items-center gap-1.5 rounded-md bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50">
-            <Plus className="h-4 w-4" /> Schedule
-          </button>
-        </div>
-      </form>
-    </div>
-  )
 }
 
 function TimeGrid({ days, eventsByDate, today, selected, onSelect, multiDay = false }) {
@@ -618,7 +372,6 @@ export default function CalendarPage() {
   }, [])
   const [view, setView] = useState('month')
   const [anchor, setAnchor] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
-  const [extraEvents, setExtraEvents] = useState([])
   const [approvedPosts, setApprovedPosts] = useState([])
   const [calendarError, setCalendarError] = useState(null)
 
@@ -661,15 +414,14 @@ export default function CalendarPage() {
           bannerColor: pickEventColor(p.id),
         }
       })
-    return [...extraEvents, ...scheduledPosts].map((ev) => ({
+    return scheduledPosts.map((ev) => ({
       ...ev,
       date: addDays(today, ev.dayOffset ?? 0),
     }))
-  }, [today, extraEvents, approvedPosts])
+  }, [today, approvedPosts])
 
   const todaysEvent = eventsByDate.find((ev) => isSameDay(ev.date, today))
   const [selected, setSelected] = useState(todaysEvent ?? null)
-  const [scheduleDate, setScheduleDate] = useState(null)
   const [previewEvent, setPreviewEvent] = useState(null)
 
   const selectedWithImages = useMemo(() => {
@@ -741,31 +493,6 @@ export default function CalendarPage() {
     }
   }
 
-  function handleScheduleSave(ev) {
-    const newEvent = {
-      id: `cal-new-${Date.now()}`,
-      dayOffset: Math.round((scheduleDate - today) / (1000 * 60 * 60 * 24)),
-      type: 'MOTION',
-      title: ev.title,
-      time: ev.time,
-      endTime: ev.endTime,
-      thumbClass: 'bg-gradient-to-br from-brand-200 to-brand-400',
-      bannerColor: pickEventColor(`cal-new-${Date.now()}`),
-      description: ev.description,
-      hashtags: ev.hashtags,
-      expectedReach: '—',
-      reachDelta: '',
-      bestPlatform: ev.platform,
-      matchScore: 90,
-      sentimentLabel: 'OPTIMISTIC',
-      audienceLabel: 'Scheduled',
-      audiencePercent: 70,
-    }
-    setExtraEvents((prev) => [...prev, newEvent])
-    setScheduleDate(null)
-    setSelected(newEvent)
-  }
-
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       <div className="flex-1 space-y-4">
@@ -814,7 +541,7 @@ export default function CalendarPage() {
           </Select>
 
           <button
-            onClick={() => setScheduleDate(today)}
+            onClick={() => navigate('/create-post')}
             className="flex items-center gap-1.5 rounded-md bg-brand-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-600"
           >
             <Plus className="h-4 w-4" />
@@ -830,7 +557,7 @@ export default function CalendarPage() {
             eventsByDate={eventsByDate}
             selected={selected}
             onSelect={setSelected}
-            onDayClick={setScheduleDate}
+            onDayClick={() => navigate('/create-post')}
           />
         )}
         {view === 'week' && (
@@ -986,14 +713,6 @@ export default function CalendarPage() {
             platforms: previewEvent.platforms ?? [previewEvent.bestPlatform],
           }}
           onClose={() => setPreviewEvent(null)}
-        />
-      )}
-
-      {scheduleDate && (
-        <ScheduleModal
-          date={scheduleDate}
-          onClose={() => setScheduleDate(null)}
-          onSave={handleScheduleSave}
         />
       )}
     </div>

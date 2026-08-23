@@ -18,6 +18,16 @@ const platformData = {
   Instagram: (
     <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="pl-ig" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#FEDA75" /><stop offset="25%" stopColor="#FA7E1E" /><stop offset="50%" stopColor="#D62976" /><stop offset="75%" stopColor="#962FBF" /><stop offset="100%" stopColor="#4F5BD5" /></linearGradient></defs><rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="url(#pl-ig)" strokeWidth="2" /><circle cx="12" cy="12" r="4.2" stroke="url(#pl-ig)" strokeWidth="2" /><circle cx="17.3" cy="6.7" r="1.2" fill="url(#pl-ig)" /></svg>
   ),
+  Facebook: (
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="#1877F2">
+      <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
+    </svg>
+  ),
+  Twitter: (
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="black" aria-label="X">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  ),
 }
 
 function GenerateView({ period, onBack, onGenerate }) {
@@ -165,7 +175,7 @@ function GenerateView({ period, onBack, onGenerate }) {
                   <div
                     className={
                       referenceUrl
-                        ? 'flex w-64 items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600'
+                        ? 'flex w-48 items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600'
                         : 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50'
                     }
                   >
@@ -189,7 +199,44 @@ function GenerateView({ period, onBack, onGenerate }) {
                     )}
                   </div>
 
-                  <span className="ml-auto text-xs text-neutral-400">{prompt.length} / 2000 chars</span>
+                  <div ref={toneRef} className="relative ml-auto">
+                    <button
+                      type="button"
+                      onClick={() => { setShowToneDropdown(!showToneDropdown); setShowLanguageDropdown(false) }}
+                      className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+                    >
+                      <svg className="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+                      Tone: {tone}
+                      <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                    </button>
+                    {showToneDropdown && (
+                      <div className="absolute left-0 top-full z-10 mt-1 w-48 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
+                        {toneOptions.map((o) => (
+                          <button key={o} type="button" onClick={() => { setTone(o); setShowToneDropdown(false) }}
+                            className={`w-full px-3 py-2 text-left text-sm transition hover:bg-neutral-50 ${tone === o ? 'bg-brand-50 font-medium text-brand-700' : 'text-neutral-600'}`}>{o}</button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div ref={langRef} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => { setShowLanguageDropdown(!showLanguageDropdown); setShowToneDropdown(false) }}
+                      className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+                    >
+                      <svg className="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>
+                      {language}
+                      <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                    </button>
+                    {showLanguageDropdown && (
+                      <div className="absolute left-0 top-full z-10 mt-1 w-32 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
+                        {languageOptions.map((o) => (
+                          <button key={o} type="button" onClick={() => { setLanguage(o); setShowLanguageDropdown(false) }}
+                            className={`w-full px-3 py-2 text-left text-sm transition hover:bg-neutral-50 ${language === o ? 'bg-brand-50 font-medium text-brand-700' : 'text-neutral-600'}`}>{o}</button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {uploadedFiles.length > 0 && (
@@ -205,7 +252,7 @@ function GenerateView({ period, onBack, onGenerate }) {
                             removeFile(file.id)
                           }}
                           aria-label="Remove image"
-                          className="absolute -right-1.5 -top-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-neutral-800 text-white shadow-sm ring-2 ring-white transition hover:bg-black"
+                          className="absolute -right-1.5 -top-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-brand-500 text-white shadow-sm ring-2 ring-white transition hover:bg-brand-600"
                         >
                           <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -215,49 +262,11 @@ function GenerateView({ period, onBack, onGenerate }) {
                     ))}
                   </div>
                 )}
+
+                <span className="text-right text-xs text-neutral-400">{prompt.length} / 2000 chars</span>
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <div ref={toneRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => { setShowToneDropdown(!showToneDropdown); setShowLanguageDropdown(false) }}
-                  className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
-                >
-                  <svg className="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
-                  Tone: {tone}
-                  <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-                </button>
-                {showToneDropdown && (
-                  <div className="absolute left-0 top-full z-10 mt-1 w-48 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
-                    {toneOptions.map((o) => (
-                      <button key={o} type="button" onClick={() => { setTone(o); setShowToneDropdown(false) }}
-                        className={`w-full px-3 py-2 text-left text-sm transition hover:bg-neutral-50 ${tone === o ? 'bg-brand-50 font-medium text-brand-700' : 'text-neutral-600'}`}>{o}</button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div ref={langRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => { setShowLanguageDropdown(!showLanguageDropdown); setShowToneDropdown(false) }}
-                  className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
-                >
-                  <svg className="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>
-                  {language}
-                  <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-                </button>
-                {showLanguageDropdown && (
-                  <div className="absolute left-0 top-full z-10 mt-1 w-32 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
-                    {languageOptions.map((o) => (
-                      <button key={o} type="button" onClick={() => { setLanguage(o); setShowLanguageDropdown(false) }}
-                        className={`w-full px-3 py-2 text-left text-sm transition hover:bg-neutral-50 ${language === o ? 'bg-brand-50 font-medium text-brand-700' : 'text-neutral-600'}`}>{o}</button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 

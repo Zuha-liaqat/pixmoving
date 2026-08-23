@@ -567,9 +567,7 @@ export default function ApprovalQueuePage() {
     setApprovingIds((prev) => new Set([...prev, ...ids]))
     try {
       await approveGeneratedPosts(ids)
-      setItems((prev) =>
-        prev.map((item) => (ids.includes(item.id) ? { ...item, status: 'PRODUCTION' } : item)),
-      )
+      await loadItems()
       addNotification({
         type: 'approval',
         title: `${count} post${count > 1 ? 's' : ''} approved`,
@@ -592,20 +590,18 @@ export default function ApprovalQueuePage() {
   async function handleApprove(id) {
     setApprovingIds((prev) => new Set(prev).add(id))
     try {
+      const item = items.find((i) => i.id === id)
       await approveGeneratedPosts([id])
-      setItems((prev) => {
-        const item = prev.find((i) => i.id === id)
-        if (item) {
-          addNotification({
-            type: 'approval',
-            title: `"${item.title}" approved`,
-            description: `Your ${item.platform} post has been approved and moved to production.`,
-            platform: item.platform,
-            author: 'Alex Martinez',
-          })
-        }
-        return prev.map((i) => (i.id === id ? { ...i, status: 'PRODUCTION' } : i))
-      })
+      await loadItems()
+      if (item) {
+        addNotification({
+          type: 'approval',
+          title: `"${item.title}" approved`,
+          description: `Your ${item.platform} post has been approved and moved to production.`,
+          platform: item.platform,
+          author: 'Alex Martinez',
+        })
+      }
     } catch (err) {
       window.alert(err.message)
     } finally {

@@ -37,6 +37,16 @@ const platformIcons = {
       <circle cx="17.3" cy="6.7" r="1.2" fill="url(#cp-ig)" />
     </svg>
   ),
+  Facebook: (
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="#1877F2">
+      <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
+    </svg>
+  ),
+  Twitter: (
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="black" aria-label="X">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  ),
 }
 
 const sectionIcons = {
@@ -295,7 +305,7 @@ export default function CreatePostPage() {
                   isDragOver ? 'bg-brand-50' : ''
                 }`}
               >
-                <div className="flex flex-wrap items-center gap-2">
+                <div ref={dropdownRef} className="flex flex-wrap items-center gap-2">
                   {/* Add Image */}
                   <button
                     type="button"
@@ -310,7 +320,7 @@ export default function CreatePostPage() {
                   <div
                     className={
                       referenceUrl
-                        ? 'flex w-64 items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600'
+                        ? 'flex w-48 items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600'
                         : 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50'
                     }
                   >
@@ -336,7 +346,81 @@ export default function CreatePostPage() {
                     )}
                   </div>
 
-                  <span className="ml-auto text-xs text-neutral-400">{prompt.length} / 2000 chars</span>
+                  {/* Tone Selector */}
+                  <div className="relative ml-auto">
+                    <button
+                      onClick={() => {
+                        setShowToneDropdown(!showToneDropdown)
+                        setShowLanguageDropdown(false)
+                        setShowUrlDialog(false)
+                      }}
+                      className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+                    >
+                      <svg className="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                      </svg>
+                      Tone: {tone}
+                      <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                      </svg>
+                    </button>
+                    {showToneDropdown && (
+                      <div className="absolute left-0 top-full z-10 mt-1 w-48 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
+                        {toneOptions.map((option) => (
+                          <button
+                            key={option}
+                            onClick={() => {
+                              setTone(option)
+                              setShowToneDropdown(false)
+                            }}
+                            className={`w-full px-3 py-2 text-left text-sm transition hover:bg-neutral-50 ${
+                              tone === option ? 'bg-brand-50 font-medium text-brand-700' : 'text-neutral-600'
+                            }`}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Language Selector */}
+                  <div className="relative">
+                    <button
+                      onClick={() => {
+                        setShowLanguageDropdown(!showLanguageDropdown)
+                        setShowToneDropdown(false)
+                        setShowUrlDialog(false)
+                      }}
+                      className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+                    >
+                      <svg className="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                      </svg>
+                      {language}
+                      <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                      </svg>
+                    </button>
+                    {showLanguageDropdown && (
+                      <div className="absolute left-0 top-full z-10 mt-1 w-32 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
+                        {languageOptions.map((option) => (
+                          <button
+                            key={option}
+                            onClick={() => {
+                              setLanguage(option)
+                              setShowLanguageDropdown(false)
+                            }}
+                            className={`w-full px-3 py-2 text-left text-sm transition hover:bg-neutral-50 ${
+                              language === option ? 'bg-brand-50 font-medium text-brand-700' : 'text-neutral-600'
+                            }`}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {uploadedFiles.length > 0 && (
@@ -352,7 +436,7 @@ export default function CreatePostPage() {
                             removeFile(file.id)
                           }}
                           aria-label="Remove image"
-                          className="absolute -right-1.5 -top-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-neutral-800 text-white shadow-sm ring-2 ring-white transition hover:bg-black"
+                          className="absolute -right-1.5 -top-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-brand-500 text-white shadow-sm ring-2 ring-white transition hover:bg-brand-600"
                         >
                           <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -362,86 +446,9 @@ export default function CreatePostPage() {
                     ))}
                   </div>
                 )}
-              </div>
-            </div>
 
-            <div ref={dropdownRef} className="mt-3 flex flex-wrap items-center gap-3">
-              {/* Tone Selector */}
-              <div className="relative">
-                <button
-                  onClick={() => {
-                    setShowToneDropdown(!showToneDropdown)
-                    setShowLanguageDropdown(false)
-                    setShowUrlDialog(false)
-                  }}
-                  className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
-                >
-                  <svg className="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                  </svg>
-                  Tone: {tone}
-                  <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                  </svg>
-                </button>
-                {showToneDropdown && (
-                  <div className="absolute left-0 top-full z-10 mt-1 w-48 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
-                    {toneOptions.map((option) => (
-                      <button
-                        key={option}
-                        onClick={() => {
-                          setTone(option)
-                          setShowToneDropdown(false)
-                        }}
-                        className={`w-full px-3 py-2 text-left text-sm transition hover:bg-neutral-50 ${
-                          tone === option ? 'bg-brand-50 font-medium text-brand-700' : 'text-neutral-600'
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <span className="text-right text-xs text-neutral-400">{prompt.length} / 2000 chars</span>
               </div>
-
-              {/* Language Selector */}
-              <div className="relative">
-                <button
-                  onClick={() => {
-                    setShowLanguageDropdown(!showLanguageDropdown)
-                    setShowToneDropdown(false)
-                    setShowUrlDialog(false)
-                  }}
-                  className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
-                >
-                  <svg className="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-                  </svg>
-                  {language}
-                  <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                  </svg>
-                </button>
-                {showLanguageDropdown && (
-                  <div className="absolute left-0 top-full z-10 mt-1 w-32 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
-                    {languageOptions.map((option) => (
-                      <button
-                        key={option}
-                        onClick={() => {
-                          setLanguage(option)
-                          setShowLanguageDropdown(false)
-                        }}
-                        className={`w-full px-3 py-2 text-left text-sm transition hover:bg-neutral-50 ${
-                          language === option ? 'bg-brand-50 font-medium text-brand-700' : 'text-neutral-600'
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
             </div>
 
             <input
@@ -452,6 +459,41 @@ export default function CreatePostPage() {
               onChange={handleFileSelect}
               className="hidden"
             />
+
+            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-neutral-200 pt-3">
+              {tags.map((tag, i) => (
+                <span
+                  key={tag}
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${tagColors[i % tagColors.length]}`}
+                >
+                  {tag}
+                  <button
+                    onClick={() => removeTag(tag)}
+                    aria-label={`Remove ${tag}`}
+                    className="opacity-60 transition hover:opacity-100"
+                  >
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  addTag(newTag)
+                  setNewTag('')
+                }}
+                className="flex items-center"
+              >
+                <input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="+ Tag"
+                  className="w-20 rounded-full border border-dashed border-brand-300 bg-white px-3 py-1 text-xs outline-none focus:border-brand-500"
+                />
+              </form>
+            </div>
           </div>
 
           {/* Platform Target */}
@@ -516,45 +558,6 @@ export default function CreatePostPage() {
                   className={inputClass}
                 />
               </div>
-            </div>
-          </div>
-
-          {/* Tags */}
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-            <SectionLabel icon={sectionIcons.details} chip={sectionChips.details} title="TAGS" />
-            <div className="flex flex-wrap items-center gap-2">
-              {tags.map((tag, i) => (
-                <span
-                  key={tag}
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${tagColors[i % tagColors.length]}`}
-                >
-                  {tag}
-                  <button
-                    onClick={() => removeTag(tag)}
-                    aria-label={`Remove ${tag}`}
-                    className="opacity-60 transition hover:opacity-100"
-                  >
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </span>
-              ))}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  addTag(newTag)
-                  setNewTag('')
-                }}
-                className="flex items-center"
-              >
-                <input
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  placeholder="+ Tag"
-                  className="w-20 rounded-full border border-dashed border-brand-300 bg-white px-3 py-1 text-xs outline-none focus:border-brand-500"
-                />
-              </form>
             </div>
           </div>
 
