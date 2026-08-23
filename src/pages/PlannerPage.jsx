@@ -4,6 +4,15 @@ import { useNavigate } from 'react-router-dom'
 const toneOptions = ['Professional', 'Casual', 'Enthusiastic', 'Informative', 'Humorous']
 const languageOptions = ['EN-US', 'EN-GB', 'ES', 'FR', 'DE', 'JA']
 
+const tagColors = [
+  'bg-brand-100 text-brand-800',
+  'bg-fuchsia-100 text-fuchsia-700',
+  'bg-emerald-100 text-emerald-700',
+  'bg-amber-100 text-amber-700',
+  'bg-violet-100 text-violet-700',
+  'bg-sky-100 text-sky-700',
+]
+
 const coreThemes = [
   'Product Innovation',
   'Sustainability',
@@ -47,6 +56,8 @@ function GenerateView({ period, onBack, onGenerate }) {
   const [selectedThemes, setSelectedThemes] = useState(['Product Innovation', 'Behind the Scenes'])
   const [uploadedFiles, setUploadedFiles] = useState([])
   const [isDragOver, setIsDragOver] = useState(false)
+  const [tags, setTags] = useState(['#PIXMoving', '#RoboBus'])
+  const [newTag, setNewTag] = useState('')
 
   useEffect(() => {
     function handle(e) {
@@ -66,6 +77,17 @@ function GenerateView({ period, onBack, onGenerate }) {
 
   function toggleTheme(t) {
     setSelectedThemes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))
+  }
+
+  function addTag(tag) {
+    const clean = tag.trim().replace(/^#*/, '#')
+    if (clean.length > 1 && !tags.includes(clean)) {
+      setTags((prev) => [...prev, clean])
+    }
+  }
+
+  function removeTag(tag) {
+    setTags((prev) => prev.filter((t) => t !== tag))
   }
 
   function addFiles(files) {
@@ -267,6 +289,40 @@ function GenerateView({ period, onBack, onGenerate }) {
               </div>
             </div>
 
+            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-neutral-200 pt-3">
+              {tags.map((tag, i) => (
+                <span
+                  key={tag}
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${tagColors[i % tagColors.length]}`}
+                >
+                  {tag}
+                  <button
+                    onClick={() => removeTag(tag)}
+                    aria-label={`Remove ${tag}`}
+                    className="opacity-60 transition hover:opacity-100"
+                  >
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  addTag(newTag)
+                  setNewTag('')
+                }}
+                className="flex items-center"
+              >
+                <input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="+ Tag"
+                  className="w-20 rounded-full border border-dashed border-brand-300 bg-white px-3 py-1 text-xs outline-none focus:border-brand-500"
+                />
+              </form>
+            </div>
           </div>
         </div>
 
