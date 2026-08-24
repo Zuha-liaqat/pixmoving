@@ -320,7 +320,7 @@ export default function CreatePostPage() {
                   <div
                     className={
                       referenceUrl
-                        ? 'flex w-48 items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600'
+                        ? 'flex w-48 max-sm:w-40 items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600'
                         : 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-white transition hover:bg-neutral-50'
                     }
                   >
@@ -347,7 +347,7 @@ export default function CreatePostPage() {
                   </div>
 
                   {/* Tone Selector */}
-                  <div className="relative ml-auto">
+                  <div className="relative ml-auto max-sm:ml-0">
                     <button
                       onClick={() => {
                         setShowToneDropdown(!showToneDropdown)
@@ -503,7 +503,7 @@ export default function CreatePostPage() {
               {Object.entries(platformIcons).map(([platform, icon]) => (
                 <label
                   key={platform}
-                  className={`flex flex-1 min-w-[140px] cursor-pointer select-none items-center gap-3 rounded-lg border p-2.5 transition ${
+                  className={`flex flex-1 min-w-[140px] max-sm:min-w-full cursor-pointer select-none items-center gap-3 rounded-lg border p-2.5 transition ${
                     selectedPlatforms.includes(platform)
                       ? 'border-brand-300 bg-brand-50'
                       : 'border-neutral-200 bg-white hover:bg-neutral-50'
@@ -531,7 +531,7 @@ export default function CreatePostPage() {
           {/* Schedule */}
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <SectionLabel icon={sectionIcons.schedule} chip={sectionChips.schedule} title="SCHEDULE" />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-3">
               <div>
                 <label htmlFor="schedule-date" className="mb-1.5 block text-xs font-medium text-neutral-500">
                   Date <span className="text-red-500">*</span>
@@ -565,7 +565,7 @@ export default function CreatePostPage() {
             <button
               onClick={handleGenerate}
               disabled={!prompt.trim() || selectedPlatforms.length === 0 || !scheduleDate || !scheduleTime || isGenerating}
-              className="flex cursor-pointer items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50 max-sm:w-full"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />

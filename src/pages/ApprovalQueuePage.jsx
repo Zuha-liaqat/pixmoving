@@ -64,9 +64,6 @@ const statusStyles = {
   FLAGGED: 'bg-red-50 text-red-600 ring-1 ring-red-200',
 }
 
-const scoreBarColor = (score) =>
-  score >= 90 ? 'bg-emerald-500' : score >= 60 ? 'bg-amber-500' : 'bg-red-500'
-
 function getInitials(title) {
   const letters = title
     .trim()
@@ -74,20 +71,6 @@ function getInitials(title) {
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase() ?? '')
   return letters.join('') || '?'
-}
-
-function ScoreBar({ score }) {
-  return (
-    <div className="flex items-center gap-2">
-      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-neutral-200">
-        <div
-          className={`h-full rounded-full ${scoreBarColor(score)}`}
-          style={{ width: `${score}%` }}
-        />
-      </div>
-      <span className="text-xs font-medium text-neutral-600">{score}%</span>
-    </div>
-  )
 }
 
 function StatusPill({ status }) {
@@ -200,7 +183,6 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
               </th>
               <th className="px-3 py-3.5">POST PREVIEW</th>
               <th className="px-3 py-3.5">PLATFORM</th>
-              <th className="px-3 py-3.5">AI SAFETY SCORE</th>
               <th className="px-3 py-3.5">LANGUAGE</th>
               <th className="px-3 py-3.5">TIMESTAMP</th>
               <th className="px-3 py-3.5 text-right">ACTIONS</th>
@@ -255,9 +237,6 @@ function ListView({ items, onPreview, onEdit, onDelete, onApprove, selectedIds, 
                         {platformIcons[platform]}
                         <span className="text-neutral-600">{platform}</span>
                       </div>
-                    </td>
-                    <td className="px-3 py-3.5">
-                      <ScoreBar score={item.score} />
                     </td>
                     <td className="px-3 py-3.5 text-neutral-600">{item.language || '—'}</td>
                     <td className="px-3 py-3.5 whitespace-nowrap text-neutral-500">{item.timestamp}</td>
@@ -709,14 +688,32 @@ export default function ApprovalQueuePage() {
       )}
 
       {status === 'loading' && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-64 animate-pulse rounded-lg border border-neutral-200 bg-neutral-100"
-            />
-          ))}
-        </div>
+        view === 'list' ? (
+          <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-4 border-b border-neutral-100 px-4 py-3.5 last:border-0"
+              >
+                <div className="h-4 w-4 shrink-0 animate-pulse rounded bg-neutral-100" />
+                <div className="h-10 w-10 shrink-0 animate-pulse rounded-md bg-neutral-100" />
+                <div className="h-3 flex-1 max-w-[220px] animate-pulse rounded bg-neutral-100" />
+                <div className="h-3 w-20 shrink-0 animate-pulse rounded bg-neutral-100" />
+                <div className="h-3 w-16 shrink-0 animate-pulse rounded bg-neutral-100" />
+                <div className="h-3 w-24 shrink-0 animate-pulse rounded bg-neutral-100" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-64 animate-pulse rounded-lg border border-neutral-200 bg-neutral-100"
+              />
+            ))}
+          </div>
+        )
       )}
 
       {status === 'ready' && items.length === 0 && (
