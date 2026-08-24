@@ -163,8 +163,8 @@ function GenerateView({ period, onBack, onGenerate }) {
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Describe the posts in detail. e.g., 'Write professional LinkedIn posts announcing our new autonomous coffee cart fleet in Tokyo...'"
                 rows={11}
-                className={`w-full resize-none rounded-lg border border-neutral-200 bg-white px-4 pt-3 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 ${
-                  uploadedFiles.length > 0 ? 'pb-28' : 'pb-12'
+                className={`w-full resize-none rounded-lg border border-neutral-200 bg-white px-4 pt-3 pb-3 text-sm text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 ${
+                  uploadedFiles.length > 0 ? 'sm:pb-28' : 'sm:pb-12'
                 }`}
               />
               <input
@@ -179,7 +179,7 @@ function GenerateView({ period, onBack, onGenerate }) {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`absolute inset-x-3 bottom-3 flex flex-col-reverse gap-2 rounded-lg transition ${
+                className={`mt-3 sm:mt-0 sm:absolute sm:inset-x-3 sm:bottom-3 flex flex-col-reverse gap-2 rounded-lg transition ${
                   isDragOver ? 'bg-brand-50' : ''
                 }`}
               >
