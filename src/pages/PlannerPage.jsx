@@ -401,6 +401,7 @@ function GenerateView({ period, onBack, onGenerate }) {
       <div className="flex items-center gap-3">
         <button
           onClick={onGenerate}
+          data-analytics-event="generate_post"
           className="flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

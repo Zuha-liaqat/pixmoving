@@ -565,6 +565,7 @@ export default function CreatePostPage() {
             <button
               onClick={handleGenerate}
               disabled={!prompt.trim() || selectedPlatforms.length === 0 || !scheduleDate || !scheduleTime || isGenerating}
+              data-analytics-event="generate_post"
               className="flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50 max-sm:w-full"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

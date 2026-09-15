@@ -868,6 +868,7 @@ export default function PostPreviewModal({ item, onClose, onPublish, published, 
             <button
               onClick={onPublish}
               disabled={published || publishing}
+              data-analytics-event="publish_post"
               className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm transition disabled:cursor-not-allowed ${
                 published ? 'bg-emerald-600' : 'bg-brand-500 hover:bg-brand-600 disabled:opacity-60'
               }`}

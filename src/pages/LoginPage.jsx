@@ -173,6 +173,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
+              data-analytics-event="sign_in"
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-500 py-2.5 text-sm font-semibold tracking-wide text-white shadow-sm transition hover:bg-brand-600 hover:shadow-md disabled:opacity-60"
             >
               {submitting && (

@@ -142,6 +142,7 @@ export default function EditContentPage() {
         <button
           onClick={handleSave}
           disabled={saving}
+          data-analytics-event="save_content"
           className="rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saving ? 'SAVING…' : 'Save Changes'}

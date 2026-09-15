@@ -106,6 +106,7 @@ function ActionButtons({ compact, onPreview, onEdit, onDelete, onApprove, approv
           onClick={onApprove}
           disabled={approved || approving}
           aria-label={approved ? 'Approved' : 'Approve'}
+          data-analytics-event="approve_content"
           className={`flex h-8 w-8 items-center justify-center rounded-md border transition disabled:cursor-not-allowed ${
             approved
               ? 'border-emerald-200 bg-emerald-50 text-emerald-600'
@@ -404,6 +405,7 @@ function GridView({ items, onPreview, onEdit, onApprove, onDelete, deletingId, a
                 <button
                   onClick={() => onApprove(item.id)}
                   disabled={approved || approving}
+                  data-analytics-event="approve_content"
                   className={`flex min-w-[104px] flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-medium whitespace-nowrap transition disabled:cursor-not-allowed ${
                     approved ? 'bg-emerald-600 text-white' : 'cursor-pointer bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-60'
                   }`}
@@ -671,6 +673,7 @@ export default function ApprovalQueuePage() {
           <button
             onClick={handleBatchApprove}
             disabled={selectedIds.size === 0 || approvingIds.size > 0}
+            data-analytics-event="approve_content"
             className="flex cursor-pointer items-center gap-1.5 rounded-md bg-brand-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
